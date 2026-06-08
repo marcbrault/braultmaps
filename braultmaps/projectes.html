@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projectes — Brault Maps</title>
+<meta name="description" content="Repositori de projectes cartogràfics: mapes, anàlisis i visualitzacions.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="logo-mark">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <circle cx="5" cy="5" r="3.5" stroke="#f0ede6" stroke-width="1"/>
+        <line x1="5" y1="1.5" x2="5" y2="8.5" stroke="#f0ede6" stroke-width="0.8"/>
+        <line x1="1.5" y1="5" x2="8.5" y2="5" stroke="#f0ede6" stroke-width="0.8"/>
+      </svg>
+    </div>
+    Brault Maps
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Inici</a></li>
+    <li><a href="mapes.html">Mapes</a></li>
+    <li><a href="projectes.html" class="active">Projectes</a></li>
+    <li><a href="recursos.html">Recursos</a></li>
+    <li><a href="sobre.html">Sobre</a></li>
+  </ul>
+</nav>
+
+<main class="page-inner">
+  <div class="page-head-top">
+    <h2>Projectes</h2>
+    <span class="page-count" id="proj-count">4 projectes</span>
+  </div>
+
+  <div class="proj-filters">
+    <button class="filter-btn active" onclick="filterProj('tots',this)">Tots</button>
+    <button class="filter-btn" onclick="filterProj('mapa',this)">Mapa interactiu</button>
+    <button class="filter-btn" onclick="filterProj('analisi',this)">Anàlisi</button>
+    <button class="filter-btn" onclick="filterProj('visualitzacio',this)">Visualització</button>
+  </div>
+
+  <div class="proj-grid" id="proj-grid">
+
+    <div class="proj-card" data-type="mapa">
+      <div class="proj-thumb">
+        <svg width="140" height="105" viewBox="0 0 140 105">
+          <ellipse cx="25" cy="55" rx="12" ry="18" fill="#f0ede6"/>
+          <ellipse cx="62" cy="48" rx="20" ry="17" fill="#f0ede6"/>
+          <ellipse cx="98" cy="44" rx="16" ry="22" fill="#f0ede6"/>
+          <ellipse cx="125" cy="52" rx="10" ry="15" fill="#f0ede6"/>
+          <ellipse cx="70" cy="72" rx="25" ry="7" fill="#f0ede6"/>
+        </svg>
+      </div>
+      <div class="proj-info">
+        <div class="proj-tags"><span class="proj-tag">Mapa interactiu</span></div>
+        <div class="proj-title">Índex de Gini mundial</div>
+        <div class="proj-desc">Desigualtat econòmica per país a escala mundial. Font: Banc Mundial.</div>
+      </div>
+      <span class="proj-year">2025</span>
+    </div>
+
+    <div class="proj-card" data-type="analisi">
+      <div class="proj-thumb">
+        <svg width="140" height="105" viewBox="0 0 140 105">
+          <rect x="20" y="70" width="15" height="20" fill="#f0ede6"/>
+          <rect x="42" y="50" width="15" height="40" fill="#f0ede6"/>
+          <rect x="64" y="35" width="15" height="55" fill="#f0ede6"/>
+          <rect x="86" y="55" width="15" height="35" fill="#f0ede6"/>
+          <rect x="108" y="42" width="15" height="48" fill="#f0ede6"/>
+          <line x1="15" y1="90" x2="130" y2="90" stroke="#f0ede6" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="proj-info">
+        <div class="proj-tags"><span class="proj-tag">Anàlisi</span></div>
+        <div class="proj-title">Lorem ipsum anàlisi</div>
+        <div class="proj-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+      </div>
+      <span class="proj-year">2025</span>
+    </div>
+
+    <div class="proj-card" data-type="visualitzacio">
+      <div class="proj-thumb">
+        <svg width="140" height="105" viewBox="0 0 140 105">
+          <circle cx="70" cy="52" r="30" stroke="#f0ede6" stroke-width="1.5" fill="none"/>
+          <circle cx="70" cy="52" r="18" stroke="#f0ede6" stroke-width="1" fill="none"/>
+          <circle cx="70" cy="52" r="6" fill="#f0ede6"/>
+          <line x1="70" y1="22" x2="70" y2="16" stroke="#f0ede6" stroke-width="1"/>
+          <line x1="70" y1="82" x2="70" y2="88" stroke="#f0ede6" stroke-width="1"/>
+          <line x1="40" y1="52" x2="34" y2="52" stroke="#f0ede6" stroke-width="1"/>
+          <line x1="100" y1="52" x2="106" y2="52" stroke="#f0ede6" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="proj-info">
+        <div class="proj-tags"><span class="proj-tag">Visualització</span></div>
+        <div class="proj-title">Lorem ipsum visualització</div>
+        <div class="proj-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+      </div>
+      <span class="proj-year">2024</span>
+    </div>
+
+    <div class="proj-card" data-type="mapa">
+      <div class="proj-thumb">
+        <svg width="140" height="105" viewBox="0 0 140 105">
+          <path d="M20,30 L50,20 L90,35 L120,25 L120,75 L90,85 L50,70 L20,80 Z" stroke="#f0ede6" stroke-width="1.2" fill="none"/>
+          <path d="M50,20 L50,70" stroke="#f0ede6" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <path d="M90,35 L90,85" stroke="#f0ede6" stroke-width="0.8" stroke-dasharray="3,3"/>
+        </svg>
+      </div>
+      <div class="proj-info">
+        <div class="proj-tags"><span class="proj-tag">Mapa interactiu</span></div>
+        <div class="proj-title">Lorem ipsum mapa</div>
+        <div class="proj-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+      </div>
+      <span class="proj-year">2024</span>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>Brault Maps</span>
+  <span>© 2025 · Cartografia · SIG · Didàctica</span>
+</footer>
+
+<script>
+function filterProj(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.proj-card');
+  let visible = 0;
+  cards.forEach(card => {
+    if (type === 'tots' || card.dataset.type === type) {
+      card.style.display = '';
+      visible++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+  document.getElementById('proj-count').textContent = visible + (visible === 1 ? ' projecte' : ' projectes');
+}
+</script>
+
+</body>
+</html>
