@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BraultMaps - Índex de Gini</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Helvetica, Arial, sans-serif; background: #faf9f7; color: #1a1a1a; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1.25rem; color: #1a1a1a; border-bottom: 2px solid #1a1a1a; padding-bottom: 0.6rem; }
+  .search-label { font-size: 0.7rem; letter-spacing: 0.08em; color: #888; margin-bottom: 4px; }
+  .search-wrap { position: relative; margin-bottom: 0.75rem; }
+  #search { width: 100%; padding: 9px 12px 9px 36px; font-size: 0.95rem; border: 1px solid #1a1a1a; border-radius: 6px; background: #fff; color: #1a1a1a; font-family: inherit; outline: none; }
+  #search:focus { border-color: #444; }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #999; pointer-events: none; }
+  #dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #1a1a1a; border-top: none; border-radius: 0 0 6px 6px; max-height: 200px; overflow-y: auto; z-index: 20; }
+  .drop-item { padding: 8px 12px; cursor: pointer; font-size: 0.9rem; border-bottom: 0.5px solid #e5e5e5; color: #1a1a1a; }
+  .drop-item:hover { background: #f3f2ef; }
+  .drop-item .match { font-weight: 700; }
+  .drop-item.no-data { color: #999; font-style: italic; }
+  .legend-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 8px; font-size: 0.8rem; color: #555; }
+  #legbar { display: flex; height: 12px; width: 200px; border-radius: 3px; overflow: hidden; }
+  /* Cursor: default al mar, pointer als països */
+  .map-wrap { position: relative; background: #e8e6e0; border-radius: 10px; border: 0.5px solid #ccc; overflow: hidden; cursor: default; }
+  .map-wrap.panning { cursor: grabbing; }
+  #wmap path.country { cursor: pointer; }
+  .zoom-btns { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+  .zoom-btn { width: 30px; height: 30px; background: #fff; border: 1px solid #1a1a1a; border-radius: 5px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1a1a1a; font-family: Helvetica, Arial, sans-serif; user-select: none; }
+  .zoom-btn:hover { background: #f3f2ef; }
+  .zoom-btn:active { background: #e5e3de; }
+  /* Filtre de destacats: botons dalt esquerra */
+  .filter-btns { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+  .filter-btn { padding: 5px 10px; font-size: 0.72rem; font-family: Helvetica, Arial, sans-serif; font-weight: 700; border: 1px solid #1a1a1a; border-radius: 5px; cursor: pointer; background: #fff; color: #1a1a1a; white-space: nowrap; }
+  .filter-btn:hover { background: #f3f2ef; }
+  .filter-btn.active-red { background: #c0392b; color: #fff; border-color: #c0392b; }
+  .filter-btn.active-blue { background: #2471a3; color: #fff; border-color: #2471a3; }
+  #wmap { width: 100%; display: block; }
+  #tip { position: absolute; display: none; background: #fff; border: 0.5px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; pointer-events: none; z-index: 10; min-width: 160px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  #tip-name { font-weight: 700; margin-bottom: 3px; }
+  #tip-gini { color: #444; margin-bottom: 1px; }
+  #tip-year { font-size: 0.75rem; color: #999; }
+  #selected-banner { display: none; margin-bottom: 0.75rem; background: #fff; border: 1px solid #1a1a1a; border-radius: 6px; padding: 8px 14px; font-size: 0.9rem; align-items: center; justify-content: space-between; }
+  #selected-banner .s-info { display: flex; align-items: baseline; gap: 10px; }
+  #selected-banner .s-name { font-weight: 700; }
+  #selected-banner .s-gini { color: #444; }
+  #selected-banner .s-year { font-size: 0.75rem; color: #999; }
+  #selected-banner .s-close { cursor: pointer; font-size: 1.1rem; color: #999; padding: 0 2px; }
+  #selected-banner .s-close:hover { color: #1a1a1a; }
+  .stats-box { margin-top: 1rem; border: 1px solid #1a1a1a; border-radius: 8px; padding: 12px 16px; background: #fff; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat-item p:first-child { font-size: 0.7rem; color: #888; margin-bottom: 2px; }
+  .stat-item p:last-child { font-size: 0.9rem; font-weight: 700; }
+  .footer-row { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: #aaa; }
+</style>
+</head>
+<body>
+
+<h1>Mapa mundial interactiu de l'Índex de Gini</h1>
+
+<p class="search-label">BUSCADOR</p>
+<div class="search-wrap">
+  <span class="search-icon">&#9906;</span>
+  <input id="search" type="text" placeholder="Cerca un país...">
+  <div id="dropdown"></div>
+</div>
+
+<div id="selected-banner">
+  <div class="s-info">
+    <span class="s-name" id="sb-name"></span>
+    <span class="s-gini" id="sb-gini"></span>
+    <span class="s-year" id="sb-year"></span>
+  </div>
+  <span class="s-close" id="sb-close" title="Desseleccionar">✕</span>
+</div>
+
+<div class="legend-row">
+  <span>Igualtat</span>
+  <div id="legbar"></div>
+  <span>Desigualtat</span>
+</div>
+
+<div class="map-wrap" id="map-wrap">
+  <svg id="wmap" viewBox="0 0 960 500"></svg>
+  <div class="zoom-btns">
+    <button class="zoom-btn" id="zoom-in">+</button>
+    <button class="zoom-btn" id="zoom-out">−</button>
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn" id="filter-red">▲ Més desiguals</button>
+    <button class="filter-btn" id="filter-blue">▼ Menys desiguals</button>
+  </div>
+  <div id="tip">
+    <div id="tip-name"></div>
+    <div id="tip-gini"></div>
+    <div id="tip-year"></div>
+  </div>
+</div>
+
+<div class="stats-box">
+  <div class="stats-grid">
+    <div class="stat-item"><p>Més desigual</p><p id="s-max"></p></div>
+    <div class="stat-item"><p>Menys desigual</p><p id="s-min"></p></div>
+    <div class="stat-item"><p>Espanya</p><p id="s-esp"></p></div>
+    <div class="stat-item"><p>Països amb dades</p><p id="s-n"></p></div>
+  </div>
+</div>
+
+<div class="footer-row">
+  <span>Font: World Bank &middot; Any de referència: ~2018 &middot; 158 països</span>
+  <span>©BraultMaps - Marc Boixader Brault</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+const NUM2A3 = {"4":"AFG","8":"ALB","12":"DZA","24":"AGO","10":"ATA","32":"ARG","51":"ARM","36":"AUS","40":"AUT","31":"AZE","44":"BHS","50":"BGD","112":"BLR","56":"BEL","84":"BLZ","204":"BEN","64":"BTN","68":"BOL","70":"BIH","72":"BWA","76":"BRA","96":"BRN","100":"BGR","854":"BFA","108":"BDI","116":"KHM","120":"CMR","124":"CAN","140":"CAF","148":"TCD","152":"CHL","156":"CHN","170":"COL","178":"COG","180":"COD","188":"CRI","384":"CIV","191":"HRV","192":"CUB","196":"CYP","203":"CZE","208":"DNK","262":"DJI","214":"DOM","218":"ECU","818":"EGY","222":"SLV","226":"GNQ","232":"ERI","233":"EST","748":"SWZ","231":"ETH","238":"FLK","242":"FJI","246":"FIN","250":"FRA","260":"ATF","266":"GAB","270":"GMB","268":"GEO","276":"DEU","288":"GHA","300":"GRC","304":"GRL","320":"GTM","324":"GIN","624":"GNB","328":"GUY","332":"HTI","340":"HND","348":"HUN","352":"ISL","356":"IND","360":"IDN","364":"IRN","368":"IRQ","372":"IRL","376":"ISR","380":"ITA","388":"JAM","392":"JPN","400":"JOR","398":"KAZ","404":"KEN","408":"PRK","410":"KOR","414":"KWT","417":"KGZ","418":"LAO","428":"LVA","422":"LBN","426":"LSO","430":"LBR","434":"LBY","440":"LTU","442":"LUX","450":"MDG","454":"MWI","458":"MYS","466":"MLI","478":"MRT","484":"MEX","498":"MDA","496":"MNG","499":"MNE","504":"MAR","508":"MOZ","104":"MMR","516":"NAM","524":"NPL","528":"NLD","540":"NCL","554":"NZL","558":"NIC","562":"NER","566":"NGA","807":"MKD","578":"NOR","512":"OMN","586":"PAK","275":"PSE","591":"PAN","598":"PNG","600":"PRY","604":"PER","608":"PHL","616":"POL","620":"PRT","630":"PRI","634":"QAT","642":"ROU","643":"RUS","646":"RWA","682":"SAU","686":"SEN","688":"SRB","694":"SLE","703":"SVK","705":"SVN","90":"SLB","706":"SOM","710":"ZAF","728":"SSD","724":"ESP","144":"LKA","729":"SDN","740":"SUR","752":"SWE","756":"CHE","760":"SYR","158":"TWN","762":"TJK","834":"TZA","764":"THA","626":"TLS","768":"TGO","780":"TTO","788":"TUN","792":"TUR","795":"TKM","800":"UGA","804":"UKR","784":"ARE","826":"GBR","840":"USA","858":"URY","860":"UZB","548":"VUT","862":"VEN","704":"VNM","732":"ESH","887":"YEM","894":"ZMB","716":"ZWE"};
+
+// Nom dels països que apareixen en gris (sense dades Gini) per mostrar-los al tooltip
+const A3_NAMES = {"AFG":"Afganistan","AND":"Andorra","ATG":"Antigua i Barbuda","ATA":"Antàrtida","BHR":"Bahrain","BRN":"Brunei","CUB":"Cuba","ERI":"Eritrea","FLK":"Illes Malvines","GRL":"Grenlàndia","KWT":"Kuwait","LBY":"Líbia","NCL":"Nova Caledònia","NZL":"Nova Zelanda","OMN":"Oman","PNG":"Papua Nova Guinea","PRK":"Corea del Nord","PRI":"Puerto Rico","SAU":"Aràbia Saudita","SLB":"Illes Salomó","SOM":"Somàlia","TKM":"Turkmenistan","TWN":"Taiwan","VEN":"Veneçuela","ESH":"Sàhara Occidental","ATF":"Terres Australs Franceses"};
+
+const GINI = {"AGO":{"name":"Angola","gini":51.3,"year":2018},"ALB":{"name":"Albània","gini":30.1,"year":2018},"ARE":{"name":"Emirats Àrabs Units","gini":26.4,"year":2018},"ARG":{"name":"Argentina","gini":41.7,"year":2018},"ARM":{"name":"Armènia","gini":34.4,"year":2018},"AUS":{"name":"Austràlia","gini":34.3,"year":2018},"AUT":{"name":"Àustria","gini":30.8,"year":2018},"BDI":{"name":"Burundi","gini":38.6,"year":2013},"BEL":{"name":"Bèlgica","gini":27.2,"year":2018},"BEN":{"name":"Benín","gini":37.9,"year":2018},"BFA":{"name":"Burkina Faso","gini":43.0,"year":2018},"BGD":{"name":"Bangla Desh","gini":32.4,"year":2016},"BGR":{"name":"Bulgària","gini":41.3,"year":2018},"BIH":{"name":"Bòsnia i Hercegovina","gini":32.9,"year":2015},"BLR":{"name":"Bielorússia","gini":25.2,"year":2018},"BLZ":{"name":"Belize","gini":39.9,"year":2018},"BOL":{"name":"Bolívia","gini":42.6,"year":2018},"BRA":{"name":"Brasil","gini":53.9,"year":2018},"BRB":{"name":"Barbados","gini":34.1,"year":2016},"BTN":{"name":"Bhutan","gini":37.4,"year":2017},"BWA":{"name":"Botswana","gini":54.9,"year":2015},"CAF":{"name":"Rep. Centreafricana","gini":43.0,"year":2021},"CAN":{"name":"Canadà","gini":32.5,"year":2018},"CHE":{"name":"Suïssa","gini":33.1,"year":2018},"CHL":{"name":"Xile","gini":45.3,"year":2017},"CHN":{"name":"Xina","gini":38.5,"year":2018},"CIV":{"name":"Costa d'Ivori","gini":37.2,"year":2018},"CMR":{"name":"Camerun","gini":46.6,"year":2014},"COD":{"name":"Congo (RD)","gini":44.7,"year":2020},"COL":{"name":"Colòmbia","gini":51.6,"year":2018},"COM":{"name":"Comores","gini":45.3,"year":2014},"CPV":{"name":"Cap Verd","gini":42.4,"year":2015},"CRI":{"name":"Costa Rica","gini":48.0,"year":2018},"CYP":{"name":"Xipre","gini":32.7,"year":2018},"CZE":{"name":"Txèquia","gini":25.0,"year":2018},"DEU":{"name":"Alemanya","gini":31.9,"year":2018},"DJI":{"name":"Djibouti","gini":41.6,"year":2017},"DNK":{"name":"Dinamarca","gini":28.2,"year":2018},"DOM":{"name":"Rep. Dominicana","gini":43.7,"year":2018},"ECU":{"name":"Equador","gini":45.4,"year":2018},"EGY":{"name":"Egipte","gini":31.5,"year":2017},"ESP":{"name":"Espanya","gini":34.7,"year":2018},"EST":{"name":"Estònia","gini":30.3,"year":2018},"ETH":{"name":"Etiòpia","gini":35.0,"year":2015},"FIN":{"name":"Finlàndia","gini":27.3,"year":2018},"FJI":{"name":"Fiji","gini":36.7,"year":2013},"FRA":{"name":"França","gini":32.4,"year":2018},"FSM":{"name":"Micronèsia","gini":40.1,"year":2013},"GAB":{"name":"Gabon","gini":38.0,"year":2017},"GBR":{"name":"Regne Unit","gini":33.7,"year":2018},"GEO":{"name":"Geòrgia","gini":36.4,"year":2018},"GHA":{"name":"Ghana","gini":43.5,"year":2016},"GIN":{"name":"Guinea","gini":29.6,"year":2018},"GMB":{"name":"Gàmbia","gini":35.9,"year":2015},"GNB":{"name":"Guinea Bissau","gini":34.8,"year":2018},"GNQ":{"name":"Guinea Equatorial","gini":38.5,"year":2022},"GRC":{"name":"Grècia","gini":32.9,"year":2018},"GRD":{"name":"Grenada","gini":43.8,"year":2018},"GTM":{"name":"Guatemala","gini":48.3,"year":2014},"HND":{"name":"Hondures","gini":48.9,"year":2018},"HRV":{"name":"Croàcia","gini":29.7,"year":2018},"HUN":{"name":"Hongria","gini":30.6,"year":2017},"IDN":{"name":"Indonèsia","gini":36.3,"year":2018},"IND":{"name":"Índia","gini":25.5,"year":2022},"IRL":{"name":"Irlanda","gini":30.6,"year":2018},"IRN":{"name":"Iran","gini":37.4,"year":2018},"IRQ":{"name":"Iraq","gini":29.8,"year":2023},"ISL":{"name":"Islàndia","gini":26.6,"year":2018},"ISR":{"name":"Israel","gini":38.6,"year":2018},"ITA":{"name":"Itàlia","gini":35.2,"year":2018},"JAM":{"name":"Jamaica","gini":35.3,"year":2018},"JPN":{"name":"Japó","gini":32.9,"year":2018},"KAZ":{"name":"Kazakhstan","gini":27.8,"year":2018},"KEN":{"name":"Kenya","gini":40.8,"year":2015},"KGZ":{"name":"Kirguizistan","gini":27.7,"year":2018},"KIR":{"name":"Kiribati","gini":27.8,"year":2019},"KOR":{"name":"Corea del Sud","gini":33.7,"year":2018},"LAO":{"name":"Laos","gini":38.8,"year":2018},"LBN":{"name":"Líban","gini":35.5,"year":2022},"LBR":{"name":"Libèria","gini":35.3,"year":2016},"LCA":{"name":"Santa Llúcia","gini":43.7,"year":2015},"LKA":{"name":"Sri Lanka","gini":39.3,"year":2016},"LSO":{"name":"Lesotho","gini":44.9,"year":2017},"LTU":{"name":"Lituània","gini":35.7,"year":2018},"LUX":{"name":"Luxemburg","gini":35.4,"year":2018},"LVA":{"name":"Letònia","gini":35.1,"year":2018},"MAR":{"name":"Marroc","gini":39.5,"year":2013},"MDA":{"name":"Moldàvia","gini":25.7,"year":2018},"MDG":{"name":"Madagascar","gini":36.8,"year":2021},"MDV":{"name":"Maldives","gini":31.3,"year":2016},"MEX":{"name":"Mèxic","gini":46.0,"year":2018},"MHL":{"name":"Illes Marshall","gini":35.5,"year":2019},"MKD":{"name":"Macedònia del Nord","gini":33.0,"year":2018},"MLI":{"name":"Mali","gini":36.0,"year":2018},"MLT":{"name":"Malta","gini":28.7,"year":2018},"MMR":{"name":"Myanmar","gini":30.7,"year":2017},"MNE":{"name":"Montenegro","gini":36.8,"year":2018},"MNG":{"name":"Mongòlia","gini":32.7,"year":2018},"MOZ":{"name":"Moçambic","gini":54.0,"year":2014},"MRT":{"name":"Mauritània","gini":32.6,"year":2014},"MUS":{"name":"Maurici","gini":36.8,"year":2017},"MWI":{"name":"Malawi","gini":44.7,"year":2016},"MYS":{"name":"Malàisia","gini":41.2,"year":2018},"NAM":{"name":"Namíbia","gini":59.1,"year":2015},"NER":{"name":"Níger","gini":37.3,"year":2018},"NGA":{"name":"Nigèria","gini":35.1,"year":2018},"NIC":{"name":"Nicaragua","gini":46.2,"year":2014},"NLD":{"name":"Països Baixos","gini":28.1,"year":2018},"NOR":{"name":"Noruega","gini":27.6,"year":2018},"NPL":{"name":"Nepal","gini":30.0,"year":2022},"PAK":{"name":"Pakistan","gini":29.6,"year":2018},"PAN":{"name":"Panamà","gini":49.2,"year":2018},"PER":{"name":"Perú","gini":42.4,"year":2018},"PHL":{"name":"Filipines","gini":42.3,"year":2018},"POL":{"name":"Polònia","gini":30.2,"year":2018},"PRT":{"name":"Portugal","gini":33.5,"year":2018},"PRY":{"name":"Paraguai","gini":46.0,"year":2018},"PSE":{"name":"Palestina","gini":33.7,"year":2016},"QAT":{"name":"Qatar","gini":35.1,"year":2017},"ROU":{"name":"Romania","gini":35.8,"year":2018},"RUS":{"name":"Rússia","gini":35.3,"year":2018},"RWA":{"name":"Ruanda","gini":43.7,"year":2016},"SDN":{"name":"Sudan","gini":34.2,"year":2014},"SEN":{"name":"Senegal","gini":38.3,"year":2018},"SLE":{"name":"Sierra Leone","gini":35.7,"year":2018},"SLV":{"name":"El Salvador","gini":38.6,"year":2018},"SRB":{"name":"Sèrbia","gini":35.0,"year":2018},"SSD":{"name":"Sudan del Sud","gini":44.0,"year":2016},"STP":{"name":"São Tomé","gini":40.7,"year":2017},"SUR":{"name":"Surinam","gini":39.2,"year":2022},"SVK":{"name":"Eslovàquia","gini":25.0,"year":2018},"SVN":{"name":"Eslovènia","gini":24.6,"year":2018},"SWE":{"name":"Suècia","gini":30.0,"year":2018},"SWZ":{"name":"Eswatini","gini":54.6,"year":2016},"SYC":{"name":"Seychelles","gini":32.1,"year":2018},"SYR":{"name":"Síria","gini":26.4,"year":2022},"TCD":{"name":"Txad","gini":37.5,"year":2018},"TGO":{"name":"Togo","gini":42.5,"year":2018},"THA":{"name":"Tailàndia","gini":36.4,"year":2018},"TJK":{"name":"Tadjikistan","gini":34.0,"year":2015},"TLS":{"name":"Timor Oriental","gini":28.7,"year":2014},"TON":{"name":"Tonga","gini":33.5,"year":2015},"TUN":{"name":"Tunísia","gini":32.8,"year":2015},"TUR":{"name":"Turquia","gini":42.4,"year":2018},"TZA":{"name":"Tanzània","gini":40.5,"year":2018},"UGA":{"name":"Uganda","gini":42.8,"year":2016},"UKR":{"name":"Ucraïna","gini":26.1,"year":2018},"URY":{"name":"Uruguai","gini":39.7,"year":2018},"USA":{"name":"Estats Units","gini":41.8,"year":2018},"UZB":{"name":"Uzbekistan","gini":32.9,"year":2021},"VNM":{"name":"Vietnam","gini":35.7,"year":2018},"VUT":{"name":"Vanuatu","gini":32.3,"year":2019},"WSM":{"name":"Samoa","gini":38.7,"year":2013},"XKX":{"name":"Kosovo","gini":44.6,"year":2018},"YEM":{"name":"Iemen","gini":36.7,"year":2014},"ZAF":{"name":"Sud-àfrica","gini":59.6,"year":2014},"ZMB":{"name":"Zàmbia","gini":55.8,"year":2015},"ZWE":{"name":"Zimbàbue","gini":44.3,"year":2017}};
+
+const colorScale = d3.scaleSequential().domain([24,62]).interpolator(t=>d3.interpolateRdYlBu(1-t)).clamp(true);
+
+const legbar = document.getElementById('legbar');
+for(let i=0;i<40;i++){const d=document.createElement('div');d.style.flex='1';d.style.background=colorScale(24+(i*38/39));legbar.appendChild(d);}
+
+const entries = Object.values(GINI);
+const maxE = entries.reduce((a,b)=>b.gini>a.gini?b:a);
+const minE = entries.reduce((a,b)=>b.gini<a.gini?b:a);
+document.getElementById('s-max').textContent = maxE.name+' ('+maxE.gini+')';
+document.getElementById('s-min').textContent = minE.name+' ('+minE.gini+')';
+document.getElementById('s-esp').textContent = 'Gini '+GINI['ESP'].gini;
+document.getElementById('s-n').textContent = entries.length+' països';
+
+const tip = document.getElementById('tip');
+const svg = d3.select('#wmap');
+const mapWrap = document.getElementById('map-wrap');
+const proj = d3.geoEqualEarth().scale(153).translate([480,265]);
+const path = d3.geoPath().projection(proj);
+let pathSel = null;
+let currentZoom = 1;
+let selectedCode = null;
+let activeFilter = null; // 'red' | 'blue' | null
+
+// Threshold: top/bottom 20 countries
+const sortedByGini = [...entries].sort((a,b)=>b.gini-a.gini);
+const top20codes = new Set(sortedByGini.slice(0,20).map(e=>Object.keys(GINI).find(k=>GINI[k]===e)));
+const bot20codes = new Set(sortedByGini.slice(-20).map(e=>Object.keys(GINI).find(k=>GINI[k]===e)));
+
+// ── Zoom ──
+const zoomBehaviour = d3.zoom()
+  .scaleExtent([1, 12])
+  .translateExtent([[-100,-50],[1060,550]])
+  .on('start', () => { mapWrap.classList.add('panning'); })
+  .on('end',   () => { mapWrap.classList.remove('panning'); })
+  .on('zoom', (event) => {
+    currentZoom = event.transform.k;
+    svg.select('g#map-g').attr('transform', event.transform);
+    if(pathSel) pathSel.attr('stroke-width', d => {
+      const a3 = NUM2A3[String(d.id)];
+      return (a3 === selectedCode ? 1.5 : 0.4) / currentZoom;
+    });
+    updateScaleBar(currentZoom);
+  });
+svg.call(zoomBehaviour);
+
+function applyZoom(factor) {
+  svg.transition().duration(300).call(zoomBehaviour.scaleBy, factor);
+}
+document.getElementById('zoom-in').addEventListener('click',  () => applyZoom(1.5));
+document.getElementById('zoom-out').addEventListener('click', () => applyZoom(1/1.5));
+
+// ── Filtre destacats ──
+function getCountryFill(a3) {
+  if(!a3 || !GINI[a3]) return '#d1d5db';
+  if(activeFilter === 'red')  return top20codes.has(a3) ? colorScale(GINI[a3].gini) : '#e8e6e0';
+  if(activeFilter === 'blue') return bot20codes.has(a3) ? colorScale(GINI[a3].gini) : '#e8e6e0';
+  return colorScale(GINI[a3].gini);
+}
+
+function applyFill() {
+  if(!pathSel) return;
+  pathSel.attr('fill', d => getCountryFill(NUM2A3[String(d.id)]));
+}
+
+document.getElementById('filter-red').addEventListener('click', function() {
+  if(activeFilter === 'red') { activeFilter = null; this.classList.remove('active-red'); }
+  else { activeFilter = 'red'; this.classList.add('active-red'); document.getElementById('filter-blue').classList.remove('active-blue'); }
+  applyFill();
+});
+document.getElementById('filter-blue').addEventListener('click', function() {
+  if(activeFilter === 'blue') { activeFilter = null; this.classList.remove('active-blue'); }
+  else { activeFilter = 'blue'; this.classList.add('active-blue'); document.getElementById('filter-red').classList.remove('active-red'); }
+  applyFill();
+});
+
+// ── Selecció ──
+function highlightCountry(code) {
+  if(!pathSel) return;
+  pathSel
+    .attr('stroke', d => NUM2A3[String(d.id)] === code ? '#1a1a1a' : '#fff')
+    .attr('stroke-width', d => (NUM2A3[String(d.id)] === code ? 1.5 : 0.4) / currentZoom);
+  if(code) pathSel.filter(d => NUM2A3[String(d.id)] === code).raise();
+}
+
+function selectCountry(code) {
+  selectedCode = code;
+  const info = GINI[code];
+  document.getElementById('sb-name').textContent = info.name;
+  document.getElementById('sb-gini').textContent = 'Gini: ' + info.gini;
+  document.getElementById('sb-year').textContent = '(' + info.year + ')';
+  document.getElementById('selected-banner').style.display = 'flex';
+  highlightCountry(code);
+}
+
+function deselect() {
+  selectedCode = null;
+  document.getElementById('selected-banner').style.display = 'none';
+  document.getElementById('search').value = '';
+  highlightCountry(null);
+}
+document.getElementById('sb-close').addEventListener('click', deselect);
+
+// ── Barra d'escala dinàmica ──
+let scaleLineEl, scaleTextEl;
+function updateScaleBar(k) {
+  if(!scaleLineEl) return;
+  const km  = Math.max(100, Math.round(2000 / k / 100) * 100);
+  const px  = km * 48 / 2000;
+  scaleLineEl.setAttribute('x2', px);
+  scaleTextEl.setAttribute('x', px / 2);
+  scaleTextEl.textContent = km.toLocaleString('ca') + ' km';
+  scaleLineEl.parentNode.querySelectorAll('.tick-r')
+    .forEach(t => { t.setAttribute('x1', px); t.setAttribute('x2', px); });
+}
+
+// ── Carregar mapa ──
+fetch('https://raw.githubusercontent.com/vega/vega-datasets/master/data/world-110m.json')
+  .then(r => r.json())
+  .then(world => {
+    const countries = topojson.feature(world, world.objects.countries);
+    const mapG = svg.append('g').attr('id','map-g');
+
+    pathSel = mapG.selectAll('path')
+      .data(countries.features)
+      .join('path')
+      .attr('class', d => {
+        const a3 = NUM2A3[String(d.id)];
+        return (a3 && GINI[a3]) ? 'country' : 'country nodata';
+      })
+      .attr('d', path)
+      .attr('fill', d => getCountryFill(NUM2A3[String(d.id)]))
+      .attr('stroke','#fff')
+      .attr('stroke-width', 0.4)
+      .on('mousemove', function(event, d) {
+        const a3  = NUM2A3[String(d.id)];
+        const rect = document.getElementById('wmap').getBoundingClientRect();
+        tip.style.left = (event.clientX - rect.left + 14) + 'px';
+        tip.style.top  = (event.clientY - rect.top  - 10) + 'px';
+        if(a3 && GINI[a3]) {
+          const info = GINI[a3];
+          document.getElementById('tip-name').textContent = info.name;
+          document.getElementById('tip-gini').textContent = 'Índex de Gini: ' + info.gini;
+          document.getElementById('tip-year').textContent = 'Any de les dades: ' + info.year;
+          tip.style.display = 'block';
+        } else if(a3) {
+          // País sense dades: busca el nom a GINI (per si hi és) o a A3_NAMES
+          const nom = (GINI[a3] && GINI[a3].name) || A3_NAMES[a3] || a3;
+          document.getElementById('tip-name').textContent = nom;
+          document.getElementById('tip-gini').textContent = 'Sense dades';
+          document.getElementById('tip-year').textContent = '';
+          tip.style.display = 'block';
+        } else {
+          tip.style.display = 'none';
+        }
+      })
+      .on('mouseleave', () => { tip.style.display = 'none'; })
+      .on('click', function(event, d) {
+        event.stopPropagation();
+        const a3 = NUM2A3[String(d.id)];
+        if(a3 && GINI[a3]) {
+          document.getElementById('search').value = GINI[a3].name;
+          document.getElementById('dropdown').style.display = 'none';
+          selectCountry(a3);
+        } else {
+          deselect();
+        }
+      });
+
+    // Clic al mar → deseleccionar
+    svg.on('click', function(event) {
+      if(event.target === svg.node() || event.target.tagName === 'svg') deselect();
+    });
+
+    // ── Decoració SVG: nord + escala + projecció ──
+    const ns   = 'http://www.w3.org/2000/svg';
+    const deco = document.createElementNS(ns,'g');
+    deco.setAttribute('id','deco');
+
+    // Fletxa nord — disseny nou: doble triangle buit + lletra N
+    const gN = document.createElementNS(ns,'g');
+    gN.setAttribute('transform','translate(856,460)');
+    // Meitat nord (plena fosca)
+    const nHalf = document.createElementNS(ns,'polygon');
+    nHalf.setAttribute('points','0,-16 7,4 0,0'); nHalf.setAttribute('fill','#333');
+    // Meitat sud (plena clara)
+    const sHalf = document.createElementNS(ns,'polygon');
+    sHalf.setAttribute('points','0,-16 -7,4 0,0'); sHalf.setAttribute('fill','#aaa');
+    // Cercle central
+    const circ = document.createElementNS(ns,'circle');
+    circ.setAttribute('cx','0'); circ.setAttribute('cy','0'); circ.setAttribute('r','3');
+    circ.setAttribute('fill','#faf9f7'); circ.setAttribute('stroke','#555'); circ.setAttribute('stroke-width','1');
+    // Lletra N
+    const nTxt = document.createElementNS(ns,'text');
+    nTxt.setAttribute('x','0'); nTxt.setAttribute('y','-20'); nTxt.setAttribute('text-anchor','middle');
+    nTxt.setAttribute('font-size','10'); nTxt.setAttribute('font-family','Helvetica,Arial,sans-serif');
+    nTxt.setAttribute('font-weight','700'); nTxt.setAttribute('fill','#333'); nTxt.textContent='N';
+    gN.appendChild(nHalf); gN.appendChild(sHalf); gN.appendChild(circ); gN.appendChild(nTxt);
+    deco.appendChild(gN);
+
+    // Barra d'escala — alineada just a la dreta de la fletxa
+    const gS = document.createElementNS(ns,'g');
+    gS.setAttribute('transform','translate(872,464)');
+    const sLine = document.createElementNS(ns,'line');
+    sLine.setAttribute('x1','0'); sLine.setAttribute('y1','0');
+    sLine.setAttribute('x2','48'); sLine.setAttribute('y2','0');
+    sLine.setAttribute('stroke','#333'); sLine.setAttribute('stroke-width','2');
+    const mkTick = (x, cls) => {
+      const t = document.createElementNS(ns,'line');
+      t.setAttribute('x1',x); t.setAttribute('y1','0'); t.setAttribute('x2',x); t.setAttribute('y2','-6');
+      t.setAttribute('stroke','#333'); t.setAttribute('stroke-width','1.5');
+      if(cls) t.setAttribute('class', cls);
+      return t;
+    };
+    const sTxt = document.createElementNS(ns,'text');
+    sTxt.setAttribute('x','24'); sTxt.setAttribute('y','-9');
+    sTxt.setAttribute('text-anchor','middle'); sTxt.setAttribute('font-size','9');
+    sTxt.setAttribute('font-family','Helvetica,Arial,sans-serif'); sTxt.setAttribute('fill','#333');
+    sTxt.textContent='2.000 km';
+    gS.appendChild(sLine); gS.appendChild(mkTick(0,null)); gS.appendChild(mkTick(48,'tick-r')); gS.appendChild(sTxt);
+    deco.appendChild(gS);
+    scaleLineEl = sLine; scaleTextEl = sTxt;
+
+    // Nom de la projecció
+    const pTxt = document.createElementNS(ns,'text');
+    pTxt.setAttribute('x','10'); pTxt.setAttribute('y','493');
+    pTxt.setAttribute('font-size','9'); pTxt.setAttribute('font-family','Helvetica,Arial,sans-serif');
+    pTxt.setAttribute('fill','#888'); pTxt.textContent='Projecció: Equal Earth (àrees reals)';
+    deco.appendChild(pTxt);
+
+    document.getElementById('wmap').appendChild(deco);
+  });
+
+// ── Buscador ──
+// Cerca: primer pels que comencen per la query, després pels que la contenen
+const searchEl = document.getElementById('search');
+const dropdown = document.getElementById('dropdown');
+
+const allCountries = [
+  ...Object.entries(GINI).map(([code,v]) => ({ code, name: v.name, hasData: true, gini: v.gini })),
+  ...Object.entries(A3_NAMES)
+    .filter(([code]) => !GINI[code])
+    .map(([code,name]) => ({ code, name, hasData: false }))
+].sort((a,b) => a.name.localeCompare(b.name, 'ca'));
+
+function highlightMatch(text, q) {
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if(idx < 0) return document.createTextNode(text);
+  const span = document.createElement('span');
+  span.appendChild(document.createTextNode(text.slice(0, idx)));
+  const mark = document.createElement('span');
+  mark.className = 'match';
+  mark.textContent = text.slice(idx, idx + q.length);
+  span.appendChild(mark);
+  span.appendChild(document.createTextNode(text.slice(idx + q.length)));
+  return span;
+}
+
+searchEl.addEventListener('input', function() {
+  const q = this.value.trim();
+  dropdown.innerHTML = '';
+  if(!q) { dropdown.style.display = 'none'; return; }
+
+  const ql = q.toLowerCase();
+  // Primer els que comencen per q, després els que el contenen en un altre lloc
+  const startsWith = allCountries.filter(c => c.name.toLowerCase().startsWith(ql));
+  const contains   = allCountries.filter(c => !c.name.toLowerCase().startsWith(ql) && c.name.toLowerCase().includes(ql));
+  const matches    = [...startsWith, ...contains].slice(0, 10);
+
+  if(!matches.length) { dropdown.style.display = 'none'; return; }
+
+  matches.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'drop-item' + (c.hasData ? '' : ' no-data');
+    const label = document.createElement('span');
+    label.appendChild(highlightMatch(c.name, q));
+    const suffix = document.createTextNode(c.hasData ? ' — Gini: ' + c.gini : ' — sense dades');
+    item.appendChild(label);
+    item.appendChild(suffix);
+    item.addEventListener('click', () => {
+      searchEl.value = c.name;
+      dropdown.style.display = 'none';
+      if(c.hasData) selectCountry(c.code); else deselect();
+    });
+    dropdown.appendChild(item);
+  });
+  dropdown.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+  if(!searchEl.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
+});
+</script>
+</body>
+</html>
