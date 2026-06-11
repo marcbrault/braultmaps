@@ -17,6 +17,9 @@ header{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:
 .logo{font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
 .logo-mark{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .head-title{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.head-right{display:flex;align-items:center;gap:1.25rem}
+.head-back{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);text-decoration:none;transition:color .15s}
+.head-back:hover{color:var(--ink)}
 
 /* Panell de control */
 #panel{position:fixed;left:1.5rem;bottom:1.5rem;z-index:20;display:flex;flex-direction:column;gap:10px}
@@ -71,7 +74,7 @@ header{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:
     </span>
     Brault Maps
   </a>
-  <span class="head-title">Pirineu 3D — Cerdanya · Ripollès</span>
+  <span class="head-right"><a class="head-back" href="../mapes.html">← Mapes</a><span class="head-title">Pirineu 3D — Cerdanya · Ripollès</span></span>
 </header>
 
 <div id="scene"></div>
@@ -237,8 +240,8 @@ function showCard(p) {
 document.getElementById('card-close').onclick = () => card.classList.remove('show');
 
 // --- Controls (pan 1:1, gir amb botó dret, damping) ---
-const cur  = {r: W*0.95, th: Math.PI, ph: 1.12, tx: 0, tz: 0};
-const goal = {r: W*0.95, th: Math.PI, ph: 1.12, tx: 0, tz: 0};
+const cur  = {r: W*0.95, th: 0, ph: 1.12, tx: 0, tz: 0};
+const goal = {r: W*0.95, th: 0, ph: 1.12, tx: 0, tz: 0};
 const PHI_MIN = 0.15, PHI_MAX = 1.45;
 const R_MIN = W*0.07, R_MAX = W*2.6;
 const TX_MAX = W/2 - 1, TZ_MAX = H/2 - 1;
@@ -357,7 +360,7 @@ document.getElementById('btn-cims').onclick = function() {
   this.classList.toggle('active', showPeaks);
 };
 document.getElementById('btn-reset').onclick = () => {
-  Object.assign(goal, {r: W*0.95, th: Math.PI, ph: 1.12, tx: 0, tz: 0});
+  Object.assign(goal, {r: W*0.95, th: 0, ph: 1.12, tx: 0, tz: 0});
 };
 
 addEventListener('resize', () => {

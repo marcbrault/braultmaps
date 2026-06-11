@@ -23,15 +23,15 @@
   </ul>
 </nav>
 
-<main class="page-inner">
+<main class="page-inner page-wide">
   <a href="../mapes.html" class="back-btn">← Tornar als mapes</a>
   <div class="page-head-top">
     <h2>Índex de Gini mundial</h2>
     <span class="page-count">Banc Mundial</span>
   </div>
   <p class="page-intro">Distribució de la desigualtat econòmica per país. Cerca un país, filtra per nivells i explora el mapa.</p>
-  <div class="embed-wrap">
-    <iframe src="BraultMaps_Index_de_Gini.html" title="Mapa interactiu de l'Índex de Gini mundial" loading="lazy"></iframe>
+  <div class="embed-wrap embed-auto">
+    <iframe id="gini-frame" src="BraultMaps_Index_de_Gini.html" title="Mapa interactiu de l'Índex de Gini mundial"></iframe>
   </div>
 </main>
 
@@ -52,6 +52,19 @@
     <a class="fl-disabled" title="Pròximament">Accessibilitat</a>
   </div>
 </footer>
+
+<script>
+// Ajusta l'alçada de l'iframe al contingut real (mateix origen)
+const fr = document.getElementById('gini-frame');
+function fitGini() {
+  try {
+    const d = fr.contentWindow.document.documentElement;
+    fr.style.height = (d.scrollHeight + 2) + 'px';
+  } catch (e) {}
+}
+fr.addEventListener('load', () => { fitGini(); setTimeout(fitGini, 400); });
+window.addEventListener('resize', () => setTimeout(fitGini, 150));
+</script>
 
 </body>
 </html>
