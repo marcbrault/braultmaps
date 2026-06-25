@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model de Lectura Cartogràfica Progressiva — Brault Maps</title>
+<meta name="description" content="Un model didàctic propi que converteix el mapa en l'eix metodològic per ensenyar a llegir el territori de manera crítica i progressiva. De la teoria a les eines interactives.">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+:root { --mlcp-cog:#7a9bc4; --mlcp-cul:#c98b6b; --mlcp-exp:#7faf8a; }
+.mlcp { max-width: 1000px; margin: 0 auto; padding: 0 2.5rem 6rem; }
+
+/* HERO */
+.mlcp-hero { padding: 5rem 0 3.5rem; text-align: center; border-bottom: 1px solid var(--border); }
+.mlcp-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; }
+.mlcp-hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 1.4rem; }
+.mlcp-hero .sub { font-size: 1.05rem; color: var(--ink2); line-height: 1.65; max-width: 600px; margin: 0 auto; }
+.mlcp-hero .quote { margin-top: 2rem; font-size: 0.92rem; font-style: italic; color: var(--ink2); }
+.mlcp-hero .quote strong { color: var(--ink); font-style: normal; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+.sec { padding: 4rem 0; border-bottom: 1px solid var(--border); }
+.sec-num { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.8rem; }
+.sec h2 { font-size: clamp(1.5rem, 3.5vw, 2.1rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 1rem; }
+.sec .lead { font-size: 0.95rem; color: var(--ink2); line-height: 1.7; max-width: 640px; margin-bottom: 2.5rem; }
+
+/* DIMENSIONS */
+.dims { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.dim { background: var(--bg2); padding: 2rem 1.6rem; position: relative; transition: background 0.3s; }
+.dim:hover { background: var(--bg3); }
+.dim-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.dim.cog .dim-bar { background: var(--mlcp-cog); }
+.dim.cul .dim-bar { background: var(--mlcp-cul); }
+.dim.exp .dim-bar { background: var(--mlcp-exp); }
+.dim-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.7rem; }
+.dim.cog .dim-name { color: var(--mlcp-cog); }
+.dim.cul .dim-name { color: var(--mlcp-cul); }
+.dim.exp .dim-name { color: var(--mlcp-exp); }
+.dim-text { font-size: 0.84rem; line-height: 1.6; color: var(--ink2); }
+
+/* PRINCIPIS */
+.principis { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.principi { background: var(--bg2); padding: 1.6rem 1.8rem; display: flex; gap: 1.4rem; align-items: flex-start; transition: background 0.25s; }
+.principi:hover { background: var(--bg3); }
+.principi-n { font-size: 2rem; font-weight: 700; color: var(--accent); opacity: 0.4; line-height: 1; min-width: 48px; }
+.principi-body h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+.principi-body p { font-size: 0.86rem; line-height: 1.6; color: var(--ink2); }
+
+/* FASES — timeline interactiva */
+.fases-nav { display: flex; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px 6px 0 0; overflow: hidden; }
+.fase-tab { flex: 1; background: var(--bg2); border: none; font-family: var(--ff); padding: 1.1rem 1rem; cursor: pointer; text-align: left; transition: background 0.2s; border-bottom: 3px solid transparent; }
+.fase-tab:hover { background: var(--bg3); }
+.fase-tab.active { background: var(--bg3); border-bottom-color: var(--accent); }
+.fase-tab .ft-tri { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }
+.fase-tab .ft-name { font-size: 0.95rem; font-weight: 700; color: var(--ink); margin-top: 0.3rem; }
+.fase-tab.active .ft-name { color: var(--accent); }
+.fase-panel { background: var(--bg2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 2rem 1.8rem; }
+.fase-panel .fp-verb { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.8rem; }
+.fase-panel .fp-desc { font-size: 0.9rem; line-height: 1.7; color: var(--ink2); margin-bottom: 1.5rem; }
+.fp-sdas { display: flex; flex-direction: column; gap: 8px; }
+.fp-sda { display: flex; gap: 12px; align-items: center; padding: 0.7rem 0.9rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; font-size: 0.82rem; }
+.fp-sda .sda-n { font-weight: 700; color: var(--accent); min-width: 44px; font-size: 0.72rem; }
+.fp-sda .sda-t { color: var(--ink); }
+.fp-sda a.sda-link { margin-left: auto; font-size: 0.7rem; font-weight: 700; color: var(--accent); text-decoration: none; white-space: nowrap; border: 1px solid rgba(200,185,122,0.4); padding: 4px 10px; border-radius: 99px; transition: all 0.15s; }
+.fp-sda a.sda-link:hover { background: var(--accent); color: var(--bg); }
+
+/* DIÀLEG mapa-carrer */
+.dialeg { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.5rem; align-items: center; margin-top: 1rem; }
+.dialeg-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.8rem; text-align: center; }
+.dialeg-card .dc-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+.dialeg-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.dialeg-card p { font-size: 0.82rem; line-height: 1.55; color: var(--ink2); }
+.dialeg-arrow { font-size: 1.5rem; color: var(--accent); }
+
+/* CTA eines */
+.eines-cta { margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; }
+.eina-link { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.3rem 1.4rem; text-decoration: none; transition: all 0.2s; display: block; }
+.eina-link:hover { border-color: var(--accent); transform: translateY(-2px); }
+.eina-link .el-sda { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+.eina-link .el-name { font-size: 0.95rem; font-weight: 700; color: var(--ink); margin-bottom: 0.3rem; }
+.eina-link .el-desc { font-size: 0.76rem; color: var(--ink2); line-height: 1.5; }
+
+.mlcp-foot-note { margin-top: 3rem; padding: 1.4rem 1.6rem; background: var(--bg2); border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0; }
+.mlcp-foot-note p { font-size: 0.84rem; line-height: 1.65; color: var(--ink2); }
+.mlcp-foot-note a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 768px) {
+  .mlcp { padding: 0 1rem 4rem; }
+  .dims { grid-template-columns: 1fr; }
+  .dialeg { grid-template-columns: 1fr; }
+  .dialeg-arrow { transform: rotate(90deg); }
+  .fases-nav { flex-direction: column; }
+  .principi { flex-direction: column; gap: 0.6rem; }
+  .principi-n { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">
+    <span class="logo-mark"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#f0ede6" stroke-width="1"/><line x1="5" y1="1.5" x2="5" y2="8.5" stroke="#f0ede6" stroke-width=".8"/><line x1="1.5" y1="5" x2="8.5" y2="5" stroke="#f0ede6" stroke-width=".8"/></svg></span>
+    Brault Maps
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Inici</a></li>
+    <li><a href="../mapes.html">Mapes</a></li>
+    <li><a href="../recursos.html">Recursos</a></li>
+    <li><a href="../projectes.html" class="active">Projectes</a></li>
+    <li><a href="../repositori.html">Repositori</a></li>
+    <li><a href="../sobre.html">Qui sóc</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="mlcp">
+
+    <div class="mlcp-hero">
+      <div class="mlcp-eyebrow">Model didàctic propi</div>
+      <h1>Aprendre a llegir<br>el territori</h1>
+      <p class="sub">Un model que converteix el mapa en l'eix metodològic per ensenyar ciències socials: de llegir-lo, a usar-lo com a eina d'anàlisi, fins a qüestionar-lo i crear-ne de propis.</p>
+      <p class="quote">«Per comprendre una ciutat cal baixar al carrer i observar-la des de dins.»<br>— <strong>Jane Jacobs</strong>, fil conductor del model</p>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">El punt de partida</div>
+      <h2>Cap mapa és neutre</h2>
+      <p class="lead">Un mapa no és una fotografia de la realitat: és una construcció que tria què mostra, què omet i des de quin punt de vista organitza l'espai. Llegir-lo de manera crítica no és una habilitat intuïtiva — és un aprenentatge que cal fer explícit. I en una aula de secundària, la capacitat de pensament abstracte que això exigeix és diversa: alguns hi accediran fàcilment, d'altres necessitaran acompanyament. El model parteix d'aquesta realitat.</p>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">01 · Les tres dimensions</div>
+      <h2>Com es construeix la mirada</h2>
+      <p class="lead">El model opera en tres dimensions simultànies que es reforcen mútuament al llarg de tot el curs.</p>
+      <div class="dims">
+        <div class="dim cog"><div class="dim-bar"></div>
+          <div class="dim-name">Cognitiva</div>
+          <div class="dim-text">Reconeix que llegir un mapa exigeix pensament abstracte, i que aquest no es distribueix igual. Les activitats progressen del concret cap a l'abstracte, amb el docent com a mediador dins la Zona de Desenvolupament Proper de cada alumne.</div>
+        </div>
+        <div class="dim cul"><div class="dim-bar"></div>
+          <div class="dim-name">Cultural</div>
+          <div class="dim-text">El mapa és un artefacte que la societat ha creat per pensar l'espai, i no és neutre. Cada activitat el qüestiona: qui l'ha fet, amb quina intenció, i què ha deixat fora. Llegir el mapa críticament és una competència ciutadana.</div>
+        </div>
+        <div class="dim exp"><div class="dim-bar"></div>
+          <div class="dim-name">Experiencial</div>
+          <div class="dim-text">El contacte directe amb el territori consolida la lectura cartogràfica d'una manera que l'aula sola no pot oferir. Seguint Jacobs, sortir al carrer és quan l'alumne comprova què hi ha de real —i de complex— darrere del que el mapa descriu.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">02 · Els tres principis</div>
+      <h2>Com es treballa cada dia</h2>
+      <p class="lead">Les dimensions es concreten en tres principis que guien la pràctica docent de manera sistemàtica.</p>
+      <div class="principis">
+        <div class="principi"><div class="principi-n">1</div>
+          <div class="principi-body"><h3>Progressió cognitiva</h3>
+          <p>Les activitats avancen de la lectura concreta i visual cap a la interpretació abstracta i crítica. El docent ajusta el nivell a la diversitat de l'aula i aprofita la interacció entre iguals com a motor d'aprenentatge.</p></div>
+        </div>
+        <div class="principi"><div class="principi-n">2</div>
+          <div class="principi-body"><h3>Lectura crítica</h3>
+          <p>Cada cop que s'usa un mapa, es plantegen les mateixes preguntes: qui l'ha fet, amb quina intenció i què ha deixat fora. Això transforma el mapa d'instrument tècnic en objecte d'anàlisi.</p></div>
+        </div>
+        <div class="principi"><div class="principi-n">3</div>
+          <div class="principi-body"><h3>Contrast amb el territori</h3>
+          <p>La representació cartogràfica es confronta amb l'experiència directa de l'espai. El mapa ordena el que el carrer fa visible; el carrer revela el que el mapa no pot capturar.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">03 · La progressió del curs</div>
+      <h2>Tres fases, un recorregut</h2>
+      <p class="lead">El model travessa tot el curs en tres fases que responen a nivells de pensament creixents. Tria una fase per veure com es concreta.</p>
+
+      <div class="fases-nav" id="fases-nav">
+        <button class="fase-tab active" data-f="0"><span class="ft-tri">1r trimestre</span><span class="ft-name">Llegir el mapa</span></button>
+        <button class="fase-tab" data-f="1"><span class="ft-tri">2n trimestre</span><span class="ft-name">Usar-lo com a eina</span></button>
+        <button class="fase-tab" data-f="2"><span class="ft-tri">3r trimestre</span><span class="ft-name">Qüestionar i crear</span></button>
+      </div>
+      <div class="fase-panel" id="fase-panel"></div>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">El cor del model</div>
+      <h2>El diàleg entre el mapa i el carrer</h2>
+      <p class="lead">Aprendre a llegir un mapa és aprendre a mirar el carrer d'una altra manera. I trepitjar el carrer és tornar al mapa amb nous ulls.</p>
+      <div class="dialeg">
+        <div class="dialeg-card"><div class="dc-icon">🗺️</div><h4>El mapa</h4><p>Dona l'estructura: ordena el territori, en revela les relacions, permet comparar i analitzar a diferents escales.</p></div>
+        <div class="dialeg-arrow">⇄</div>
+        <div class="dialeg-card"><div class="dc-icon">🚶</div><h4>El carrer</h4><p>Dona el sentit: la vida real, l'ambient, els usos i les complexitats que cap representació no pot capturar del tot.</p></div>
+      </div>
+    </div>
+
+    <div class="sec reveal">
+      <div class="sec-num">De la teoria a la pràctica</div>
+      <h2>Eines que encarnen el model</h2>
+      <p class="lead">Aquestes peces interactives de Brault Maps donen forma a activitats concretes del model. Provar-les és veure'l en acció.</p>
+      <div class="eines-cta">
+        <a class="eina-link" href="../recursos/projeccions.html">
+          <div class="el-sda">SdA 1 · Lectura crítica</div>
+          <div class="el-name">Comparador de projeccions</div>
+          <div class="el-desc">Descobreix com cada mapa deforma el món. El punt de partida: cap mapa és neutre.</div>
+        </a>
+        <a class="eina-link" href="../recursos/fronteres.html">
+          <div class="el-sda">SdA 5 · Progressió cognitiva</div>
+          <div class="el-name">El full transparent</div>
+          <div class="el-desc">Superposa les fronteres medievals amb les actuals. El territori canvia, la memòria queda.</div>
+        </a>
+        <a class="eina-link" href="../mapes/gini.html">
+          <div class="el-sda">SdA 7 · Lectura crítica</div>
+          <div class="el-name">Índex de Gini mundial</div>
+          <div class="el-desc">Les dades que tria un mapa determinen què pot mostrar. La desigualtat, en un mapa propi.</div>
+        </a>
+        <a class="eina-link" href="../recursos/comarques.html">
+          <div class="el-sda">SdA 2-6 · Lectura del mapa mut</div>
+          <div class="el-name">Jocs de geografia</div>
+          <div class="el-desc">Comarques i municipis: entrena la lectura del mapa mut que el model treballa a l'aula.</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mlcp-foot-note">
+      <p>El <strong>Model de Lectura Cartogràfica Progressiva</strong> és la proposta d'un Treball de Fi de Màster en Formació del Professorat de Secundària (UdG, 2026). La seva singularitat no és cap element per separat —usar mapes, sortir al territori, treballar el pensament crític ja existeixen—, sinó la <strong>sistematització</strong>: un model que treballa el mapa com a eix transversal al llarg d'un curs sencer. Les <a href="../recursos.html">eines de Brault Maps</a> en són una traducció digital oberta.</p>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-main">
+    <span>Brault Maps</span>
+    <span>© 2026 · Cartografia · SIG · Didàctica</span>
+  </div>
+  <div class="footer-legal">
+    <a href="../legal/avis-legal.html">Avís legal</a>
+    <span class="fl-sep">·</span>
+    <a href="../legal/politica-privacitat.html">Política de privacitat</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Política de cookies</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Mapa web</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Accessibilitat</a>
+  </div>
+</footer>
+
+<script>
+const FASES = [
+  { verb: 'L\'alumne aprèn a llegir el mapa', 
+    desc: 'Descobreix que el mapa és una construcció i no una fotografia de la realitat. N\'identifica els elements i les limitacions, i s\'introdueix en la diversitat de tipus de mapes i en la seva funció social. Una primera comparativa entre cartografia analògica i digital.',
+    sdas: [
+      {n:'SdA 1', t:'Com representem el món?', link:'../recursos/projeccions.html', linktext:'Provar l\'eina'},
+      {n:'SdA 2', t:'El medi físic d\'Europa i Catalunya', link:null},
+      {n:'SdA 3', t:'On viu la gent i per què', link:null},
+    ]},
+  { verb: 'L\'alumne usa el mapa com a eina d\'anàlisi',
+    desc: 'El mapa deixa de ser l\'objecte d\'estudi i es converteix en una eina per comprendre altres fenòmens: el paisatge físic, la història medieval, l\'evolució de la ciutat. És la fase de la sortida de camp a Girona, que connecta la representació amb l\'experiència directa.',
+    sdas: [
+      {n:'SdA 4', t:'La ciutat: origen i evolució', link:null},
+      {n:'SdA 5', t:'La caiguda de Roma i l\'Alta Edat Mitjana', link:'../recursos/fronteres.html', linktext:'Provar l\'eina'},
+      {n:'SdA 6', t:'Girona medieval (sortida de camp)', link:null},
+    ]},
+  { verb: 'L\'alumne qüestiona i crea',
+    desc: 'Passa de consumidor de mapes a productor crític: usa el mapa per analitzar les desigualtats territorials, reflexiona sobre la sostenibilitat i elabora una proposta cartogràfica pròpia sobre el futur de la ciutat, justificant cada decisió.',
+    sdas: [
+      {n:'SdA 7', t:'El món desigual', link:'../mapes/gini.html', linktext:'Veure el mapa'},
+      {n:'SdA 8', t:'Viure bé al territori', link:null},
+      {n:'SdA 9', t:'Girona 2050 (projecte final)', link:null},
+    ]},
+];
+
+const panel = document.getElementById('fase-panel');
+function renderFase(i){
+  const f = FASES[i];
+  let sdaHtml = f.sdas.map(s => 
+    '<div class="fp-sda"><span class="sda-n">'+s.n+'</span><span class="sda-t">'+s.t+'</span>'+
+    (s.link ? '<a class="sda-link" href="'+s.link+'">'+s.linktext+' →</a>' : '') + '</div>'
+  ).join('');
+  panel.innerHTML = '<div class="fp-verb">'+f.verb+'</div><p class="fp-desc">'+f.desc+'</p><div class="fp-sdas">'+sdaHtml+'</div>';
+}
+document.querySelectorAll('.fase-tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.fase-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    renderFase(+t.dataset.f);
+  };
+});
+renderFase(0);
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
