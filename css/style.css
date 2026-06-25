@@ -157,7 +157,7 @@ nav {
 .statement-text p:last-child { margin-bottom: 0; }
 
 /* ── PAGE INNER ── */
-.page-inner { max-width: 900px; margin: 0 auto; padding: 4rem 2.5rem 6rem; }
+.page-inner { width: 100%; max-width: 900px; margin: 0 auto; padding: 4rem 2.5rem 6rem; }
 
 .page-head-top {
   display: flex; align-items: baseline; justify-content: space-between;

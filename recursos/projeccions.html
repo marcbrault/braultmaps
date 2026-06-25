@@ -229,8 +229,10 @@ function pathFromRings(rings){ return rings.map(ringPath).join(''); }
 // Vora del món (per a projeccions el·líptiques): contorn lon -180..180 i pols
 function worldOutline(){
   const pts=[];
-  for(let la=90;la>=-90;la-=2) pts.push(project(180,la));
-  for(let la=-90;la<=90;la+=2) pts.push(project(-180,la));
+  // Meridià est de nord a sud
+  for(let la=89.9; la>=-89.9; la-=1.5) pts.push(project(179.9, la));
+  // Meridià oest de sud a nord
+  for(let la=-89.9; la<=89.9; la+=1.5) pts.push(project(-179.9, la));
   return 'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L')+'Z';
 }
 // Cercle de Tissot: petit cercle geodèsic aproximat per una el·lipse projectada
