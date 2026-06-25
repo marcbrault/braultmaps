@@ -53,8 +53,8 @@
 .fase-tab { flex: 1; background: var(--bg2); border: none; font-family: var(--ff); padding: 1.1rem 1rem; cursor: pointer; text-align: left; transition: background 0.2s; border-bottom: 3px solid transparent; }
 .fase-tab:hover { background: var(--bg3); }
 .fase-tab.active { background: var(--bg3); border-bottom-color: var(--accent); }
-.fase-tab .ft-tri { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }
-.fase-tab .ft-name { font-size: 0.95rem; font-weight: 700; color: var(--ink); margin-top: 0.3rem; }
+.fase-tab .ft-tri { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.35rem; }
+.fase-tab .ft-name { display: block; font-size: 0.95rem; font-weight: 700; color: var(--ink); }
 .fase-tab.active .ft-name { color: var(--accent); }
 .fase-panel { background: var(--bg2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 2rem 1.8rem; }
 .fase-panel .fp-verb { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.8rem; }
@@ -161,7 +161,7 @@
         </div>
         <div class="principi"><div class="principi-n">2</div>
           <div class="principi-body"><h3>Lectura crítica</h3>
-          <p>Cada cop que s'usa un mapa, es plantegen les mateixes preguntes: qui l'ha fet, amb quina intenció i què ha deixat fora. Això transforma el mapa d'instrument tècnic en objecte d'anàlisi.</p></div>
+          <p>Cada cop que s'utilitza un mapa, es plantegen les mateixes preguntes: qui l'ha fet, amb quina intenció i què ha deixat fora. Això transforma el mapa d'instrument tècnic en objecte d'anàlisi.</p></div>
         </div>
         <div class="principi"><div class="principi-n">3</div>
           <div class="principi-body"><h3>Contrast amb el territori</h3>
@@ -177,7 +177,7 @@
 
       <div class="fases-nav" id="fases-nav">
         <button class="fase-tab active" data-f="0"><span class="ft-tri">1r trimestre</span><span class="ft-name">Llegir el mapa</span></button>
-        <button class="fase-tab" data-f="1"><span class="ft-tri">2n trimestre</span><span class="ft-name">Usar-lo com a eina</span></button>
+        <button class="fase-tab" data-f="1"><span class="ft-tri">2n trimestre</span><span class="ft-name">Utilitzar-lo com a eina</span></button>
         <button class="fase-tab" data-f="2"><span class="ft-tri">3r trimestre</span><span class="ft-name">Qüestionar i crear</span></button>
       </div>
       <div class="fase-panel" id="fase-panel"></div>
@@ -208,6 +208,11 @@
           <div class="el-sda">SdA 2 · Lectura crítica</div>
           <div class="el-name">Fronteres al mapa, al territori</div>
           <div class="el-desc">Els límits comarcals segueixen el relleu? El mapa polític interpreta el físic, no el calca.</div>
+        </a>
+        <a class="eina-link" href="../recursos/poblacio.html">
+          <div class="el-sda">SdA 3 · Contrast territori</div>
+          <div class="el-name">On viu la gent, i per què</div>
+          <div class="el-desc">La densitat de població segueix el relleu: la gent s'instal·la a la plana i la costa.</div>
         </a>
         <a class="eina-link" href="../recursos/fronteres.html">
           <div class="el-sda">SdA 5 · Progressió cognitiva</div>
@@ -259,9 +264,9 @@ const FASES = [
     sdas: [
       {n:'SdA 1', t:'Com representem el món?', link:'../recursos/projeccions.html', linktext:'Provar l\'eina'},
       {n:'SdA 2', t:'El medi físic d\'Europa i Catalunya', link:null},
-      {n:'SdA 3', t:'On viu la gent i per què', link:null},
+      {n:'SdA 3', t:'On viu la gent i per què', link:'../recursos/poblacio.html', linktext:'Provar l\\'eina'},
     ]},
-  { verb: 'L\'alumne usa el mapa com a eina d\'anàlisi',
+  { verb: 'L\'alumne utilitza el mapa com a eina d\'anàlisi',
     desc: 'El mapa deixa de ser l\'objecte d\'estudi i es converteix en una eina per comprendre altres fenòmens: el paisatge físic, la història medieval, l\'evolució de la ciutat. És la fase de la sortida de camp a Girona, que connecta la representació amb l\'experiència directa.',
     sdas: [
       {n:'SdA 4', t:'La ciutat: origen i evolució', link:null},
@@ -269,7 +274,7 @@ const FASES = [
       {n:'SdA 6', t:'Girona medieval (sortida de camp)', link:null},
     ]},
   { verb: 'L\'alumne qüestiona i crea',
-    desc: 'Passa de consumidor de mapes a productor crític: usa el mapa per analitzar les desigualtats territorials, reflexiona sobre la sostenibilitat i elabora una proposta cartogràfica pròpia sobre el futur de la ciutat, justificant cada decisió.',
+    desc: 'Passa de consumidor de mapes a productor crític: utilitza el mapa per analitzar les desigualtats territorials, reflexiona sobre la sostenibilitat i elabora una proposta cartogràfica pròpia sobre el futur de la ciutat, justificant cada decisió.',
     sdas: [
       {n:'SdA 7', t:'El món desigual', link:'../mapes/gini.html', linktext:'Veure el mapa'},
       {n:'SdA 8', t:'Viure bé al territori', link:null},

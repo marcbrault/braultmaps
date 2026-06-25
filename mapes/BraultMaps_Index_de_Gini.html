@@ -201,5 +201,15 @@ $('st-min').innerHTML = `${sorted[sorted.length-1].n} <small>${sorted[sorted.len
 const esp = els['ESP'];
 if(esp && esp.data.g!=null) $('st-esp').innerHTML = `<small>Gini ${esp.data.g}</small>`;
 </script>
+<script>
+function reportHeight(){
+  const h = document.querySelector('.wrap').getBoundingClientRect().height + 20;
+  if(window.parent !== window) window.parent.postMessage({giniHeight: Math.ceil(h)}, '*');
+}
+window.addEventListener('load', reportHeight);
+window.addEventListener('resize', reportHeight);
+setTimeout(reportHeight, 300);
+setTimeout(reportHeight, 1000);
+</script>
 </body>
 </html>

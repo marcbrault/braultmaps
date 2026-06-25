@@ -56,5 +56,13 @@
 
 
 
+<script>
+window.addEventListener('message', e => {
+  if(e.data && e.data.giniHeight){
+    const f = document.getElementById('gini-frame');
+    if(f) f.style.height = e.data.giniHeight + 'px';
+  }
+});
+</script>
 </body>
 </html>
