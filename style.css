@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Vic en 3D: edificis per any de construcció — Brault Maps</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<base target="_blank">
+<link rel="stylesheet" type="text/css" href="./Qgis2threejs.css">
+<style type="text/css">
+#popup, #header, #layerpanel {
+  left: 36px;
+}
+</style>
+<script src="./threejs/three.min.js"></script>
+<script src="./threejs/OrbitControls.js"></script>
+<script src="./threejs/ViewHelper.js"></script>
+<script src="./Qgis2threejs.js"></script>
+<style type="text/css">
+/* Brault Maps overlay */
+#bm-back {
+  position: fixed; top: 14px; right: 14px; z-index: 10000;
+  background: rgba(17,16,16,0.88); color: #c8b97a;
+  border: 1px solid rgba(200,185,122,0.45); border-radius: 99px;
+  font-family: Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 9px 16px; text-decoration: none; transition: all 0.15s;
+}
+#bm-back:hover { background: #c8b97a; color: #111010; }
+#bm-title {
+  position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 9999;
+  background: rgba(17,16,16,0.82); color: #f0ede6;
+  border: 1px solid rgba(200,185,122,0.3); border-radius: 8px;
+  font-family: Helvetica, Arial, sans-serif; font-size: 13px;
+  padding: 8px 18px; text-align: center; pointer-events: none;
+}
+#bm-title .t { font-weight: 700; }
+#bm-title .s { color: #9a968c; font-size: 11px; display: block; margin-top: 2px; }
+#bm-missing {
+  display: none; position: fixed; inset: 0; z-index: 10001;
+  background: #111010; color: #f0ede6;
+  font-family: Helvetica, Arial, sans-serif;
+  align-items: center; justify-content: center; text-align: center; padding: 2rem;
+}
+#bm-missing .box { max-width: 480px; }
+#bm-missing h2 { color: #c8b97a; font-size: 1.3rem; margin-bottom: 0.8rem; }
+#bm-missing p { font-size: 0.9rem; line-height: 1.6; color: #b5b1a7; }
+#bm-missing a { color: #c8b97a; }
+</style>
+</head>
+<body>
+<a id="bm-back" href="../../repositori.html">&larr; Brault Maps</a>
+<div id="bm-title"><span class="t">Vic en 3D: edificis per any de construcció</span><span class="s">Model 3D del parc edificat de Vic segons l'època de construcció · QGIS + three.js</span></div>
+<div id="bm-missing"><div class="box">
+  <h2>Falten els fitxers del visor</h2>
+  <p>Aquesta pàgina necessita les carpetes <strong>threejs/</strong> i <strong>data/</strong> i els fitxers <strong>Qgis2threejs.js / .css / .png</strong> exportats des de QGIS, situats en aquesta mateixa carpeta. Puja'ls al repositori al costat d'aquest HTML i el model 3D es carregarà.</p>
+  <p><a href="../../repositori.html">&larr; Tornar al repositori</a></p>
+</div></div>
+<div id="view">
+  <div id="northarrow"></div>
+  <div id="navigation"></div>
+</div>
+
+<!-- popup -->
+<div id="popup">
+  <div id="closebtn">&times;</div>
+  <div id="popupbar"></div>
+  <div id="popupbody">
+    <div id="popupcontent"></div>
+
+    <!-- query result -->
+    <div id="queryresult">
+      <table id="qr_coords_table">
+        <caption>Coordenades del clic <div id="zoomtopoint" class="action-zoom zoombtn"></div></caption>
+        <tr><td id="qr_coords"></td></tr>
+      </table>
+
+      <table id="qr_layername_table">
+        <caption>Capa <div id="zoomtolayer" class="action-zoom zoombtn"></div></caption>
+        <tr><td id="qr_layername"></td></tr>
+      </table>
+
+      <table id="qr_attrs_table">
+        <caption>Atributs</caption>
+      </table>
+
+      <!-- camera actions and measure tool -->
+      <div id="orbitbtn" class="action-btn action-orbit">Orbita</div>
+      <div id="measurebtn" class="action-btn">Mesura la distància</div>
+    </div>
+
+    <!-- page info -->
+    <div id="pageinfo">
+      <h1>URL de la vista actual</h1>
+      <div><input id="urlbox" type="text"></div>
+
+      <h1>Com es fa servir</h1>
+      <table id="usage">
+        <tr><td colspan="2" class="star">Ratolí</td></tr>
+        <tr><td>Botó esquerre + moure</td><td>Orbitar</td></tr>
+        <tr><td>Roda del ratolí</td><td>Zoom</td></tr>
+        <tr><td>Botó dret + moure</td><td>Desplaçar</td></tr>
+
+        <tr><td colspan="2" class="star">Tecles</td></tr>
+        <tr><td>Fletxes</td><td>Moure horitzontalment</td></tr>
+        <tr><td>Maj + fletxes</td><td>Orbitar</td></tr>
+        <tr><td>Ctrl + fletxes</td><td>Rotar</td></tr>
+        <tr><td>Maj + Ctrl + amunt/avall</td><td>Apropar / allunyar</td></tr>
+        <tr><td>L</td><td>Mostrar/amagar etiquetes</td></tr>
+        <tr><td>R</td><td>Iniciar/aturar animació orbital</td></tr>
+        <tr><td>W</td><td>Mode filferro</td></tr>
+        <tr><td>Maj + R</td><td>Restablir la càmera</td></tr>
+        <tr><td>Maj + S</td><td>Desar imatge</td></tr>
+      </table>
+
+      <h1>Sobre el visor</h1>
+      <div id="about"><img src="./Qgis2threejs.png">
+        Visor creat amb <a href="https://www.qgis.org/">QGIS</a> and <a href="https://github.com/minorua/Qgis2threejs">Qgis2threejs</a> plugin (versió 2.10.2).
+        <div>Funciona amb <a href="https://threejs.org/">three.js</a>
+        <span id="lib_proj4js"> and <a href="https://trac.osgeo.org/proj4js/">Proj4js</a></span>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- progress bar -->
+<div id="progress"><div id="progressbar"></div></div>
+
+<!-- menu -->
+<div id="toolbtns">
+  <div id="layerbtn"></div>
+  <div id="animbtn" class="hidden"></div>
+  <div id="infobtn"></div>
+</div>
+
+<!-- header and footer -->
+<div id="header"></div>
+<div id="footer"></div>
+
+<!-- layer panel -->
+<div id="layerpanel">
+  <div id="layerlist"></div>
+</div>
+
+<!-- animation -->
+<div id="narrativebox" class="ef1">
+  <div id="narbody">
+
+  </div>
+  <div id="nextbtn"></div>
+</div>
+
+<script>
+if (typeof Q3D === 'undefined' || typeof THREE === 'undefined') {
+  document.getElementById('bm-missing').style.display = 'flex';
+  throw new Error('Falten les llibreries del visor (threejs/, Qgis2threejs.js)');
+}
+Q3D.Config.bgColor = 0x111111;
+Q3D.Config.localMode = true;
+
+var container = document.getElementById("view"),
+    app = Q3D.application,
+    gui = Q3D.gui;
+
+app.init(container);       // initialize viewer
+
+// load the scene
+var bmLoaded = false;
+setTimeout(function(){ if(!bmLoaded) document.getElementById('bm-missing').style.display='flex'; }, 6000);
+app.loadSceneFile("./data/vic_3d_anys/scene.js", function (scene) {
+  bmLoaded = true;
+  // scene file has been loaded
+  app.start();
+}, function (scene) {
+  // all associated files have been loaded
+
+});
+</script>
+</body>
+</html>
