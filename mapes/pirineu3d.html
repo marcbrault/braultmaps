@@ -22,12 +22,12 @@ header{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:
 .head-back:hover{color:var(--ink)}
 
 /* Panell de control */
-#panel{position:fixed;left:1.5rem;bottom:1.5rem;z-index:20;display:flex;flex-direction:column;gap:10px}
-.ctrl-group{display:flex;gap:1px;background:var(--border);border:1px solid var(--border)}
-.ctrl-btn{background:rgba(17,16,16,.85);color:var(--ink2);border:none;font-family:var(--ff);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 13px;cursor:pointer;transition:color .15s;backdrop-filter:blur(6px)}
+#panel{position:absolute;left:20px;bottom:20px;display:flex;flex-direction:column;gap:12px;background:rgba(17,16,16,.82);border:1px solid var(--border);border-radius:10px;padding:14px 16px;backdrop-filter:blur(4px);min-width:210px}
+.ctrl-group{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ctrl-btn{flex:1;background:rgba(17,16,16,.92);color:var(--ink2);border:none;font-family:var(--ff);font-size:.63rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:9px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center}
 .ctrl-btn:hover{color:var(--ink)}
 .ctrl-btn.active{background:var(--ink);color:var(--bg)}
-.ctrl-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-bottom:2px}
+.ctrl-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
 
 /* Etiquetes dels cims */
 .peak-label{position:fixed;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;z-index:10;display:flex;flex-direction:column;align-items:center;gap:0;user-select:none;-webkit-user-select:none}
@@ -59,7 +59,7 @@ header{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:
 #credits{position:fixed;bottom:.5rem;right:.75rem;font-size:.55rem;letter-spacing:.04em;color:var(--ink2);opacity:.55;z-index:14;pointer-events:none;text-align:right}
 @media(max-width:640px){#credits{left:.75rem;right:.75rem;text-align:center;font-size:.5rem}}
 #hint{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);z-index:15;opacity:.7;pointer-events:none;text-align:center}
-@media(max-width:640px){#hint{display:none}#card{left:1rem;right:1rem;width:auto}#panel{left:1rem;bottom:1rem}header{padding:0 1rem}.head-title{display:none}}
+@media(max-width:640px){#hint{display:none}#card{left:1rem;right:1rem;width:auto}#panel{position:absolute;left:20px;bottom:20px;display:flex;flex-direction:column;gap:12px;background:rgba(17,16,16,.82);border:1px solid var(--border);border-radius:10px;padding:14px 16px;backdrop-filter:blur(4px);min-width:210px}header{padding:0 1rem}.head-title{display:none}}
 </style>
 </head>
 <body>
@@ -97,9 +97,12 @@ header{position:fixed;top:0;left:0;right:0;height:54px;display:flex;align-items:
       <button class="ctrl-btn" id="layer-orto">Ortofoto</button>
     </div>
   </div>
-  <div class="ctrl-group">
-    <button class="ctrl-btn active" id="btn-cims">Cims</button>
-    <button class="ctrl-btn" id="btn-reset">Reinicia vista</button>
+  <div>
+    <div class="ctrl-label">Visualització</div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn active" id="btn-cims">Cims</button>
+      <button class="ctrl-btn" id="btn-reset">Reinicia</button>
+    </div>
   </div>
 </div>
 
@@ -396,6 +399,12 @@ function lonLatToMerc(lon, lat) {
   return [x, y];
 }
 
+// URLs de tessel·les (poden sobreescriure's per a proves amb window.ORTO_TILE_URLS)
+const ORTO_SOURCES = (window.ORTO_TILE_URLS || [
+  'https://www.ign.es/wmts/pnoa-ma?layer=OI.OrthoimageCoverage&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
+  'https://data.geopf.fr/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&TileMatrix={z}&TileCol={x}&TileRow={y}'
+]);
+
 function loadTile(url) {
   return new Promise((res, rej) => {
     const im = new Image();
@@ -406,8 +415,8 @@ function loadTile(url) {
   });
 }
 
-// Descarrega un mosaic de tessel·les XYZ que cobreixi el bbox del DEM, a un zoom Z
-async function fetchMosaic(tpl, Z) {
+// Descarrega un mosaic de tessel·les XYZ que cobreixi el bbox del DEM al zoom Z
+async function fetchMosaic(tpl, Z, onTile) {
   const [x0,y0,x1,y1] = META.extent;
   const cs = [utmToLonLat(x0,y0),utmToLonLat(x1,y0),utmToLonLat(x0,y1),utmToLonLat(x1,y1)]
     .map(([lo,la]) => lonLatToMerc(lo,la));
@@ -416,33 +425,43 @@ async function fetchMosaic(tpl, Z) {
   const tx0 = Math.floor(Math.min(...xs)*n), tx1 = Math.floor(Math.max(...xs)*n);
   const ty0 = Math.floor(Math.min(...ys)*n), ty1 = Math.floor(Math.max(...ys)*n);
   const cols = tx1-tx0+1, rows = ty1-ty0+1;
-  if (cols*rows > 260) throw new Error('massa tessel·les');
+  if (cols*rows > 300) throw new Error('massa tessel·les');
   const mos = document.createElement('canvas');
   mos.width = cols*256; mos.height = rows*256;
   const mctx = mos.getContext('2d');
   let ok = 0;
-  await Promise.all(Array.from({length: cols*rows}, (_, i) => {
-    const cx = tx0+(i%cols), cy = ty0+Math.floor(i/cols);
-    const url = tpl.replace('{z}',Z).replace('{x}',cx).replace('{y}',cy);
-    return loadTile(url).then(im => { mctx.drawImage(im,(cx-tx0)*256,(cy-ty0)*256,256,256); ok++; })
-                        .catch(()=>{});
-  }));
+  // Limita la concurrència a 8 per no ofegar el servidor
+  const jobs = [];
+  for (let i=0; i<cols*rows; i++) jobs.push(i);
+  const workers = Array.from({length: 8}, async () => {
+    while (jobs.length) {
+      const i = jobs.shift();
+      const cx = tx0+(i%cols), cy = ty0+Math.floor(i/cols);
+      const url = tpl.replace('{z}',Z).replace('{x}',cx).replace('{y}',cy);
+      try {
+        const im = await loadTile(url);
+        mctx.drawImage(im,(cx-tx0)*256,(cy-ty0)*256,256,256);
+        ok++;
+      } catch(e) {}
+      if (onTile) onTile(ok, cols*rows);
+    }
+  });
+  await Promise.all(workers);
   if (!ok) throw new Error('cap tessel·la');
-  return { mos, tx0, ty0, n };
+  return { mos, tx0, ty0, n, ok, total: cols*rows };
 }
 
-// Reprojecta un o més mosaics (Web Mercator) a una textura en l'espai UTM del DEM
+// Reprojecta els mosaics (Web Mercator) a la textura UTM del DEM, amb interpolació BILINEAL
 function reproject(mosaics, OW, OH) {
   const [x0,y0,x1,y1] = META.extent;
   const out = document.createElement('canvas');
   out.width = OW; out.height = OH;
   const octx = out.getContext('2d');
-  octx.drawImage(tex.image, 0, 0, OW, OH);  // relleu natural de base
+  octx.drawImage(tex.image, 0, 0, OW, OH);  // base: relleu natural (per forats)
   const dst = octx.getImageData(0,0,OW,OH);
   const dd = dst.data;
-  // Pre-extreu ImageData de cada mosaic
   const srcs = mosaics.map(m => ({
-    data: m.mos.getContext('2d').getImageData(0,0,m.mos.width,m.mos.height),
+    data: m.mos.getContext('2d').getImageData(0,0,m.mos.width,m.mos.height).data,
     w: m.mos.width, h: m.mos.height, tx0: m.tx0, ty0: m.ty0, n: m.n
   }));
   for (let py=0; py<OH; py++) {
@@ -452,15 +471,22 @@ function reproject(mosaics, OW, OH) {
       const [lon,lat] = utmToLonLat(E, N);
       const [mx,my] = lonLatToMerc(lon, lat);
       const di = (py*OW+px)*4;
-      // de l'últim mosaic al primer (prioritat: el primer de la llista mana)
-      for (let s=srcs.length-1; s>=0; s--) {
+      for (let s=0; s<srcs.length; s++) {   // primer amb dades guanya (PNOA prioritari)
         const S = srcs[s];
-        const sx = Math.round(mx*S.n*256 - S.tx0*256);
-        const sy = Math.round(my*S.n*256 - S.ty0*256);
-        if (sx<0||sy<0||sx>=S.w||sy>=S.h) continue;
-        const si = (sy*S.w+sx)*4;
-        if (S.data.data[si+3]===0) continue;
-        dd[di]=S.data.data[si]; dd[di+1]=S.data.data[si+1]; dd[di+2]=S.data.data[si+2]; dd[di+3]=255;
+        const fx = mx*S.n*256 - S.tx0*256 - 0.5;
+        const fy = my*S.n*256 - S.ty0*256 - 0.5;
+        const ix = Math.floor(fx), iy = Math.floor(fy);
+        if (ix<0||iy<0||ix>=S.w-1||iy>=S.h-1) continue;
+        const dx = fx-ix, dy = fy-iy;
+        const i00=(iy*S.w+ix)*4, i10=i00+4, i01=i00+S.w*4, i11=i01+4;
+        if (S.data[i00+3]===0 && S.data[i11+3]===0) continue;
+        for (let c=0;c<3;c++) {
+          dd[di+c] = Math.round(
+            S.data[i00+c]*(1-dx)*(1-dy) + S.data[i10+c]*dx*(1-dy) +
+            S.data[i01+c]*(1-dx)*dy    + S.data[i11+c]*dx*dy);
+        }
+        dd[di+3]=255;
+        break;
       }
     }
   }
@@ -482,27 +508,33 @@ btnOrto.onclick = async () => {
   if (ortoTexture) { setLayer(true); return; }
   if (ortoLoading) return;
   ortoLoading = true;
-  btnOrto.textContent = 'Carregant…';
-  const Z = 13;  // ~9,5 m/px: nítid i ràpid amb poques tessel·les
-  const OW = 2048, OH = Math.round(OW * (META.extent[3]-META.extent[1])/(META.extent[2]-META.extent[0]));
-  const PNOA = 'https://www.ign.es/wmts/pnoa-ma?layer=OI.OrthoimageCoverage&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&TileMatrix={z}&TileCol={x}&TileRow={y}';
-  const IGNFR = 'https://data.geopf.fr/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&TileMatrix={z}&TileCol={x}&TileRow={y}';
+  const Z = 13;   // ~9,5 m/px reals a lat 42.5 — el màxim raonable per <300 tessel·les
+  const OW = 3584;  // textura de sortida gran per nitidesa (47km -> ~13 m/px)
+  const OH = Math.round(OW * (META.extent[3]-META.extent[1])/(META.extent[2]-META.extent[0]));
   try {
-    const results = await Promise.allSettled([fetchMosaic(PNOA, Z), fetchMosaic(IGNFR, Z)]);
+    btnOrto.textContent = 'Carregant…';
+    const progress = (ok, total) => { btnOrto.textContent = 'Baixant ' + ok + '/' + total; };
+    const results = await Promise.allSettled([
+      fetchMosaic(ORTO_SOURCES[0], Z, progress),
+      ORTO_SOURCES[1] ? fetchMosaic(ORTO_SOURCES[1], Z, null) : Promise.reject()
+    ]);
     const mosaics = [];
-    if (results[0].status === 'fulfilled') mosaics.push(results[0].value);  // PNOA prioritari
-    if (results[1].status === 'fulfilled') mosaics.push(results[1].value);  // França emplena la resta
-    if (!mosaics.length) throw new Error('cap servei');
+    if (results[0].status === 'fulfilled') mosaics.push(results[0].value);
+    if (results[1] && results[1].status === 'fulfilled') mosaics.push(results[1].value);
+    if (!mosaics.length) throw new Error('capfont');
+    btnOrto.textContent = 'Component…';
+    await new Promise(r => setTimeout(r, 30));  // deixa pintar el botó
     ortoTexture = new THREE.CanvasTexture(reproject(mosaics, OW, OH));
     ortoTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    ortoTexture.minFilter = THREE.LinearFilter;
-    ortoTexture.generateMipmaps = false;
+    ortoTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    ortoTexture.magFilter = THREE.LinearFilter;
+    ortoTexture.generateMipmaps = true;
     ortoTexture.needsUpdate = true;
     btnOrto.textContent = 'Ortofoto';
     setLayer(true);
   } catch (e) {
-    btnOrto.textContent = 'No disponible';
-    setTimeout(() => { btnOrto.textContent = 'Ortofoto'; }, 2500);
+    btnOrto.textContent = e.message === 'capfont' ? 'Servei no disponible' : 'Error de càrrega';
+    setTimeout(() => { btnOrto.textContent = 'Ortofoto'; }, 3000);
   }
   ortoLoading = false;
 };

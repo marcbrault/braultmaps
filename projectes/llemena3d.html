@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Vall de Llémena en 3D — Brault Maps</title>
+<meta name="description" content="Projecte de visor 3D de la vall de Llémena: Sant Gregori, Sant Martí de Llémena, Llorà i Canet d'Adri, amb Rocacorba i el volcà de la Banya del Boc.">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.ll-wrap { max-width: 1050px; margin: 0 auto; padding: 2.5rem 2.5rem 5rem; }
+.ll-top { padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+.ll-top h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; }
+.ll-top .status { display: inline-block; margin-top: 0.7rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #d9a851; border: 1px solid rgba(217,168,81,0.45); padding: 4px 11px; border-radius: 99px; }
+.ll-top p { margin-top: 0.9rem; font-size: 0.9rem; color: var(--ink2); line-height: 1.65; max-width: 680px; }
+.ll-top strong { color: var(--accent); }
+
+.map-board { position: relative; border: 1px solid var(--border); background: #1a2230; border-radius: 6px; overflow: hidden; margin-top: 1.5rem; }
+#llmap { display: block; width: 100%; height: auto; cursor: grab; }
+#llmap.grabbing { cursor: grabbing; }
+.riera { fill: none; stroke: #4a90c4; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; }
+.riera-label { fill: #6badd8; font-family: var(--ff); font-size: 10px; font-style: italic; }
+.nucli { fill: var(--accent); stroke: #1a1410; stroke-width: 0.7; cursor: pointer; }
+.nucli.cap { r: 5; }
+.nucli-label { fill: #f0ede6; font-family: var(--ff); font-size: 10px; font-weight: 600; paint-order: stroke; stroke: rgba(26,34,48,0.85); stroke-width: 3px; pointer-events: none; }
+.nucli-label.cap { font-size: 11.5px; font-weight: 700; }
+.cim { fill: #b5895a; stroke: #1a1410; stroke-width: 0.6; cursor: pointer; }
+.cim-label { fill: #d4a373; font-family: var(--ff); font-size: 8.5px; paint-order: stroke; stroke: rgba(26,34,48,0.8); stroke-width: 2.5px; pointer-events: none; }
+.esgl { stroke: #9b8fb0; stroke-width: 1.6; cursor: pointer; }
+.mirador { fill: #e0d4a0; stroke: #1a1410; stroke-width: 0.8; }
+.tooltip { position: absolute; pointer-events: none; background: rgba(26,26,26,0.94); color: #fff; padding: 7px 11px; border-radius: 6px; font-size: 0.8rem; opacity: 0; transition: opacity 0.12s; white-space: nowrap; z-index: 30; }
+.zoom-ctrl { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 5px; }
+.zoom-ctrl button { width: 34px; height: 34px; border: 1px solid #555; background: rgba(35,44,58,0.92); color: #f0ede6; border-radius: 7px; font-size: 1.2rem; cursor: pointer; line-height: 1; }
+.zoom-ctrl button:hover { background: rgba(50,60,75,0.95); }
+.llegenda { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 0.9rem; font-size: 0.74rem; color: var(--ink2); }
+.llegenda span { display: flex; align-items: center; gap: 7px; }
+.lg-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.lg-tri { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid #b5895a; }
+.lg-creu { color: #9b8fb0; font-size: 0.95rem; font-weight: 700; }
+.lg-riu { width: 18px; height: 3px; background: #4a90c4; border-radius: 2px; }
+
+.ll-plans { margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; }
+.plan { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.35rem; }
+.plan .p-n { font-size: 1.4rem; font-weight: 700; color: var(--accent); opacity: 0.5; line-height: 1; margin-bottom: 0.5rem; }
+.plan h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+.plan p { font-size: 0.8rem; line-height: 1.55; color: var(--ink2); }
+
+.fact-box { margin-top: 2rem; padding: 1.1rem 1.35rem; background: var(--bg2); border-left: 3px solid var(--accent); border-radius: 0 4px 4px 0; }
+.fact-box p { font-size: 0.85rem; line-height: 1.65; color: var(--ink); }
+.fact-box .q { font-weight: 700; color: var(--accent); margin-bottom: 0.4rem; font-size: 0.9rem; }
+
+.game-note { margin-top: 1.5rem; font-size: 0.7rem; color: var(--ink2); line-height: 1.6; }
+.game-note a { color: var(--accent); text-decoration: none; }
+@media (max-width: 768px) { .ll-wrap { padding: 1.5rem 1rem 3rem; } .ll-top h2 { font-size: 1.4rem; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">
+    <span class="logo-mark"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#f0ede6" stroke-width="1"/><line x1="5" y1="1.5" x2="5" y2="8.5" stroke="#f0ede6" stroke-width=".8"/><line x1="1.5" y1="5" x2="8.5" y2="5" stroke="#f0ede6" stroke-width=".8"/></svg></span>
+    Brault Maps
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Inici</a></li>
+    <li><a href="../mapes.html">Mapes</a></li>
+    <li><a href="../recursos.html">Recursos</a></li>
+    <li><a href="../projectes.html" class="active">Projectes</a></li>
+    <li><a href="../repositori.html">Repositori</a></li>
+    <li><a href="../sobre.html">Qui sóc</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="ll-wrap">
+    <a href="../projectes.html" class="back-btn">← Tornar als projectes</a>
+    <div class="ll-top">
+      <h2>La Vall de Llémena en 3D</h2>
+      <span class="status">En construcció · fase 1: cartografia de base</span>
+      <p>Un visor tridimensional de la vall de Llémena —<strong>Sant Gregori</strong>, <strong>Sant Martí de Llémena</strong>, <strong>Llorà</strong> i <strong>Canet d'Adri</strong>— seguint el model del <a href="../mapes/pirineu3d.html" style="color:var(--accent)">visor del Pirineu</a>: relleu real navegable, els cims amb les seves fitxes, i les capes de textura natural i ortofoto. La vall combina el massís de <strong>Rocacorba</strong> (985 m), el vulcanisme de la <strong>Banya del Boc</strong> i un dels conjunts de romànic rural més densos del Gironès.</p>
+    </div>
+
+    <div class="map-board">
+      <svg id="llmap" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="zoom-ctrl"><button id="zin">+</button><button id="zout">−</button></div>
+      <div class="tooltip" id="tip"></div>
+    </div>
+    <div class="llegenda">
+      <span><span class="lg-dot"></span> Nuclis de població</span>
+      <span><span class="lg-tri"></span> Cims</span>
+      <span><span class="lg-creu">+</span> Romànic</span>
+      <span><span class="lg-riu"></span> Riera de Llémena</span>
+    </div>
+
+    <div class="ll-plans">
+      <div class="plan"><div class="p-n">1</div><h4>Cartografia de base</h4><p>Àmbit definit (19 × 16 km) i toponímia oficial de l'ICGC carregada: 10 nuclis, 18 cims i el romànic de la vall. És el mapa que veus aquí sobre.</p></div>
+      <div class="plan"><div class="p-n">2</div><h4>Model d'elevacions</h4><p>Integració del MET de l'ICGC (5 m) per aixecar el relleu: de la plana del Ter als cingles de Rocacorba. En procés.</p></div>
+      <div class="plan"><div class="p-n">3</div><h4>Visor 3D interactiu</h4><p>Navegació lliure, exageració vertical, fitxes dels cims i capa d'ortofoto — la mateixa tecnologia que el visor del Pirineu.</p></div>
+    </div>
+
+    <div class="fact-box">
+      <p class="q">Per què la Vall de Llémena?</p>
+      <p>És un territori petit amb una diversitat geogràfica enorme: una vall fluvial encaixada entre el massís de Rocacorba i els primers relleus de la Garrotxa, amb cons volcànics quaternaris (la Banya del Boc, el Puig de Ric), cingleres calcàries i un poblament dispers d'ermites i veïnats que gairebé no ha canviat en vuit segles. Un laboratori perfecte per llegir el territori en tres dimensions.</p>
+    </div>
+
+    <p class="game-note">Toponímia: © <a href="https://www.icgc.cat" target="_blank" rel="noopener">ICGC</a>, Nomenclàtor oficial (2026). Elevacions (fase 2): MET 5 m © ICGC.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-main">
+    <span>Brault Maps</span>
+    <span>© 2026 · Cartografia · SIG · Didàctica</span>
+  </div>
+  <div class="footer-legal">
+    <a href="../legal/avis-legal.html">Avís legal</a>
+    <span class="fl-sep">·</span>
+    <a href="../legal/politica-privacitat.html">Política de privacitat</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Política de cookies</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Mapa web</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Accessibilitat</a>
+  </div>
+</footer>
+
+<script>
+const DATA = {
+ "bbox": [
+  465000,
+  4645000,
+  484000,
+  4661000
+ ],
+ "nuclis": [
+  {
+   "n": "Granollers de Rocacorba",
+   "x": 471270.0,
+   "y": 4657451.0,
+   "cap": false
+  },
+  {
+   "n": "Sant Martí de Llémena",
+   "x": 470826.0,
+   "y": 4653877.0,
+   "cap": true
+  },
+  {
+   "n": "Sant Pere de Llorà",
+   "x": 475606.0,
+   "y": 4652635.0,
+   "cap": false
+  },
+  {
+   "n": "Llorà",
+   "x": 475779.0,
+   "y": 4652098.0,
+   "cap": false
+  },
+  {
+   "n": "Ginestar",
+   "x": 476615.0,
+   "y": 4651475.0,
+   "cap": false
+  },
+  {
+   "n": "Adri",
+   "x": 478465.0,
+   "y": 4655606.0,
+   "cap": false
+  },
+  {
+   "n": "Canet d'Adri",
+   "x": 478232.0,
+   "y": 4653521.0,
+   "cap": true
+  },
+  {
+   "n": "Montcal",
+   "x": 480131.0,
+   "y": 4653884.0,
+   "cap": false
+  },
+  {
+   "n": "Cartellà",
+   "x": 480633.0,
+   "y": 4652460.0,
+   "cap": false
+  },
+  {
+   "n": "Sant Gregori",
+   "x": 480135.0,
+   "y": 4648771.0,
+   "cap": true
+  }
+ ],
+ "cims": [
+  {
+   "n": "Puig de Vilagran",
+   "x": 469710.0,
+   "y": 4659075.0
+  },
+  {
+   "n": "Golany",
+   "x": 472898.0,
+   "y": 4659106.0
+  },
+  {
+   "n": "el Montner",
+   "x": 471490.0,
+   "y": 4659282.0
+  },
+  {
+   "n": "Puig Sestorres",
+   "x": 472926.0,
+   "y": 4657518.0
+  },
+  {
+   "n": "Puigsou",
+   "x": 474032.0,
+   "y": 4657891.0
+  },
+  {
+   "n": "Rocafesa",
+   "x": 472533.0,
+   "y": 4654487.0
+  },
+  {
+   "n": "els Tres Rocs",
+   "x": 471475.0,
+   "y": 4654525.0
+  },
+  {
+   "n": "Puig de la Banya del Boc",
+   "x": 473469.0,
+   "y": 4653452.0
+  },
+  {
+   "n": "Puig de les Serres",
+   "x": 472978.0,
+   "y": 4649628.0
+  },
+  {
+   "n": "Puig Rodó",
+   "x": 475744.0,
+   "y": 4660049.0
+  },
+  {
+   "n": "Rocacorba",
+   "x": 474171.0,
+   "y": 4657197.0
+  },
+  {
+   "n": "Puig Bandera",
+   "x": 475864.0,
+   "y": 4655861.0
+  },
+  {
+   "n": "Mont-rodó",
+   "x": 476639.0,
+   "y": 4655871.0
+  },
+  {
+   "n": "el Rocàs",
+   "x": 476750.0,
+   "y": 4651091.0
+  },
+  {
+   "n": "Puig d'en Frare",
+   "x": 474381.0,
+   "y": 4649087.0
+  },
+  {
+   "n": "Sant Grau",
+   "x": 476405.0,
+   "y": 4648952.0
+  },
+  {
+   "n": "Puig Saleta",
+   "x": 477928.0,
+   "y": 4655507.0
+  },
+  {
+   "n": "Puig Sarroca",
+   "x": 480602.0,
+   "y": 4656665.0
+  }
+ ],
+ "esglesies": [
+  {
+   "n": "Santa Cecília",
+   "x": 472812.0,
+   "y": 4649786.0
+  },
+  {
+   "n": "Santa Maria de Ginestar",
+   "x": 476576.0,
+   "y": 4651482.0
+  },
+  {
+   "n": "Santa Afra",
+   "x": 476865.0,
+   "y": 4650488.0
+  },
+  {
+   "n": "Sant Medir",
+   "x": 474407.0,
+   "y": 4652030.0
+  },
+  {
+   "n": "Mare de Déu de la Pietat",
+   "x": 475284.0,
+   "y": 4648344.0
+  },
+  {
+   "n": "Sant Vicenç",
+   "x": 474313.0,
+   "y": 4647892.0
+  },
+  {
+   "n": "Sant Llorenç",
+   "x": 478568.0,
+   "y": 4655600.0
+  },
+  {
+   "n": "Sant Bartomeu",
+   "x": 479134.0,
+   "y": 4647355.0
+  }
+ ],
+ "mirador": {
+  "n": "Mirador de Rocacorba",
+  "x": 474216.0,
+  "y": 4657355.0
+ },
+ "riera": [
+  [
+   469500,
+   4653400
+  ],
+  [
+   471000,
+   4653600
+  ],
+  [
+   472500,
+   4653100
+  ],
+  [
+   474000,
+   4652500
+  ],
+  [
+   475600,
+   4652000
+  ],
+  [
+   476700,
+   4651400
+  ],
+  [
+   477800,
+   4650800
+  ],
+  [
+   478900,
+   4650000
+  ],
+  [
+   479900,
+   4649200
+  ],
+  [
+   481000,
+   4648600
+  ],
+  [
+   482600,
+   4648300
+  ]
+ ]
+};
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const [X0,Y0,X1,Y1] = DATA.bbox;
+const VW = 1000, VH = Math.round(VW*(Y1-Y0)/(X1-X0));
+const svg = $('llmap');
+svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+const root = document.createElementNS(NS,'g');
+svg.appendChild(root);
+function pj(x,y){ return [(x-X0)/(X1-X0)*VW, (Y1-y)/(Y1-Y0)*VH]; }
+
+// Fons subtil: gradient per insinuar el relleu (oest alt, est pla)
+const defs = document.createElementNS(NS,'defs');
+defs.innerHTML = '<linearGradient id="terra" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#26303e"/><stop offset="0.55" stop-color="#202a37"/><stop offset="1" stop-color="#1b2431"/></linearGradient>';
+svg.insertBefore(defs, root);
+const bg = document.createElementNS(NS,'rect');
+bg.setAttribute('width',VW); bg.setAttribute('height',VH); bg.setAttribute('fill','url(#terra)');
+root.appendChild(bg);
+
+const tip = $('tip');
+function bindTip(el, txt){
+  el.addEventListener('mousemove', e => {
+    const sh = svg.parentElement.getBoundingClientRect();
+    tip.style.left=(e.clientX-sh.left+12)+'px'; tip.style.top=(e.clientY-sh.top+12)+'px';
+    tip.textContent = txt; tip.style.opacity='1';
+  });
+  el.addEventListener('mouseleave', ()=> tip.style.opacity='0');
+}
+
+// Riera
+const rp = DATA.riera.map(([x,y])=>pj(x,y));
+const riera = document.createElementNS(NS,'path');
+riera.setAttribute('d','M'+rp.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L'));
+riera.setAttribute('class','riera');
+root.appendChild(riera);
+const rl = document.createElementNS(NS,'text');
+rl.setAttribute('x', rp[3][0]+6); rl.setAttribute('y', rp[3][1]-6);
+rl.setAttribute('class','riera-label'); rl.textContent='riera de Llémena';
+root.appendChild(rl);
+
+// Esglésies romàniques (creus)
+DATA.esglesies.forEach(e => {
+  const [x,y] = pj(e.x, e.y);
+  const g = document.createElementNS(NS,'g');
+  g.innerHTML = `<line x1="${x-4}" y1="${y}" x2="${x+4}" y2="${y}" class="esgl"/><line x1="${x}" y1="${y-4}" x2="${x}" y2="${y+4}" class="esgl"/>`;
+  bindTip(g, e.n + ' (romànic)');
+  root.appendChild(g);
+});
+
+// Cims (triangles)
+DATA.cims.forEach(c => {
+  const [x,y] = pj(c.x, c.y);
+  const t = document.createElementNS(NS,'path');
+  t.setAttribute('d', `M${x},${y-6} L${x-5.5},${y+4} L${x+5.5},${y+4}Z`);
+  t.setAttribute('class','cim');
+  bindTip(t, c.n);
+  root.appendChild(t);
+  const isBig = ['Rocacorba','Puigsou','Puig de la Banya del Boc'].includes(c.n);
+  if (isBig) {
+    const l = document.createElementNS(NS,'text');
+    l.setAttribute('x', x+8); l.setAttribute('y', y+1);
+    l.setAttribute('class','cim-label'); l.setAttribute('font-weight','700');
+    l.textContent = c.n;
+    root.appendChild(l);
+  }
+});
+
+// Mirador de Rocacorba
+if (DATA.mirador) {
+  const [x,y] = pj(DATA.mirador.x, DATA.mirador.y);
+  const s = document.createElementNS(NS,'rect');
+  s.setAttribute('x',x-3.5); s.setAttribute('y',y-3.5); s.setAttribute('width',7); s.setAttribute('height',7);
+  s.setAttribute('transform',`rotate(45 ${x} ${y})`); s.setAttribute('class','mirador');
+  bindTip(s, DATA.mirador.n + ' · santuari i mirador');
+  root.appendChild(s);
+}
+
+// Nuclis
+DATA.nuclis.forEach(n => {
+  const [x,y] = pj(n.x, n.y);
+  const c = document.createElementNS(NS,'circle');
+  c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r', n.cap?5:3.4);
+  c.setAttribute('class','nucli'+(n.cap?' cap':''));
+  bindTip(c, n.n + (n.cap ? ' · cap de municipi' : ''));
+  root.appendChild(c);
+  const l = document.createElementNS(NS,'text');
+  l.setAttribute('x', x+8); l.setAttribute('y', y+4);
+  l.setAttribute('class','nucli-label'+(n.cap?' cap':''));
+  l.textContent = n.n;
+  root.appendChild(l);
+});
+
+// Zoom & pan
+let scale=1, tx=0, ty=0, drag=false, px=0, py=0;
+function applyT(){ root.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`); }
+function clamp(){ const mx=VW*(1-scale), my=VH*(1-scale); tx=Math.min(0,Math.max(mx,tx)); ty=Math.min(0,Math.max(my,ty)); }
+svg.addEventListener('wheel', e=>{ e.preventDefault(); const f=e.deltaY<0?1.15:1/1.15; scale=Math.max(1,Math.min(6,scale*f)); clamp(); applyT(); }, {passive:false});
+svg.addEventListener('mousedown', e=>{ drag=true; px=e.clientX; py=e.clientY; svg.classList.add('grabbing'); });
+window.addEventListener('mousemove', e=>{ if(!drag)return; tx+=(e.clientX-px)*(VW/svg.clientWidth); ty+=(e.clientY-py)*(VH/svg.clientHeight); px=e.clientX; py=e.clientY; clamp(); applyT(); });
+window.addEventListener('mouseup', ()=>{ drag=false; svg.classList.remove('grabbing'); });
+$('zin').onclick=()=>{ scale=Math.min(6,scale*1.4); clamp(); applyT(); };
+$('zout').onclick=()=>{ scale=Math.max(1,scale/1.4); clamp(); applyT(); };
+</script>
+
+</body>
+</html>
