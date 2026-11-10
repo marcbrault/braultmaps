@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'últim hivern de l'Aneto — Brault Maps</title>
+<link rel="canonical" href="https://braultmaps.com/mapes/aneto.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Brault Maps">
+<meta property="og:locale" content="ca_ES">
+<meta property="og:title" content="L'últim hivern de l'Aneto — Brault Maps">
+<meta property="og:description" content="La glacera de l'Aneto vista pel satèl·lit Sentinel-2 el 2016, el 2022 i el 2025: compara els anys en color natural, fals color i índex de neu.">
+<meta property="og:url" content="https://braultmaps.com/mapes/aneto.html">
+<meta property="og:image" content="https://braultmaps.com/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="La glacera de l'Aneto vista pel satèl·lit Sentinel-2 el 2016, el 2022 i el 2025: compara els anys en color natural, fals color i índex de neu.">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.pz { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2.5rem 5rem; }
+.pz-kicker { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 1.5rem 0 1rem; }
+.pz h1 { font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 1.5rem; }
+.pz h1 em { font-weight: 300; color: var(--ink2); }
+.pz-lead { font-size: 0.95rem; line-height: 1.75; color: var(--ink2); max-width: 620px; margin-bottom: 2.5rem; }
+.pz-lead strong { color: var(--ink); font-weight: 700; }
+.seg { display: inline-flex; border: 1px solid var(--border); }
+.seg button { background: none; border: 0; border-left: 1px solid var(--border); color: var(--ink2); font: 700 0.62rem var(--ff); letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.9rem; cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.ctl-lab { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.5rem; }
+.pz-note { margin-top: 2.5rem; font-size: 0.72rem; line-height: 1.7; color: var(--ink2); max-width: 760px; }
+.pz-note a { color: var(--accent); text-decoration: none; }
+.pz h2 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; margin: 3.5rem 0 1rem; }
+.pz p.txt { font-size: 0.9rem; line-height: 1.75; color: var(--ink2); max-width: 640px; margin-bottom: 1rem; }
+.pz p.txt strong { color: var(--ink); }
+@media (max-width: 768px) { .pz { padding: 1.5rem 1.25rem 3rem; } }
+
+.an-ctl { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin-bottom: 1.25rem; align-items: flex-end; }
+.an-stage { position: relative; border: 1px solid var(--border); aspect-ratio: 1086 / 759; overflow: hidden; background: var(--bg2); user-select: none; touch-action: pan-y; }
+.an-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+#imgB { clip-path: inset(0 0 0 var(--x, 50%)); }
+.an-div { position: absolute; top: 0; bottom: 0; left: var(--x, 50%); width: 2px; margin-left: -1px; background: var(--ink); pointer-events: none; }
+.an-div::after { content: '‹ ›'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--ink); color: var(--bg); font: 700 0.8rem var(--ff); padding: 0.45rem 0.5rem; white-space: nowrap; }
+.an-tag { position: absolute; top: 1rem; font-size: clamp(1.4rem, 4vw, 2.4rem); font-weight: 700; letter-spacing: -0.04em; color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,0.7); pointer-events: none; }
+#tagA { left: 1.1rem; } #tagB { right: 1.1rem; }
+.an-stage input[type=range] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.an-cap { font-size: 0.75rem; line-height: 1.6; color: var(--ink2); margin-top: 0.9rem; max-width: 760px; min-height: 2.4em; }
+.an-facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 3rem 0 0; }
+.an-facts div { background: var(--bg); padding: 1.4rem 1.5rem; }
+.an-facts b { display: block; font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.an-facts span { display: block; margin-top: 0.35rem; font-size: 0.72rem; line-height: 1.5; color: var(--ink2); }
+@media (max-width: 768px) { .an-facts { grid-template-columns: 1fr 1fr; } .an-facts b { font-size: 1.4rem; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">
+    <span class="logo-mark"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#f0ede6" stroke-width="1"/><line x1="5" y1="1.5" x2="5" y2="8.5" stroke="#f0ede6" stroke-width=".8"/><line x1="1.5" y1="5" x2="8.5" y2="5" stroke="#f0ede6" stroke-width=".8"/></svg></span>
+    Brault Maps
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Inici</a></li>
+    <li><a href="../mapes.html" class="active">Mapes</a></li>
+    <li><a href="../recursos.html">Recursos</a></li>
+    <li><a href="../projectes.html">Projectes</a></li>
+    <li><a href="../repositori.html">Repositori</a></li>
+    <li><a href="../sobre.html">Qui sóc</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="pz">
+    <a href="../mapes.html" class="back-btn">← Tornar als mapes</a>
+    <div class="pz-kicker">Teledetecció · Pirineu</div>
+    <h1>L'últim hivern<br><em>de l'Aneto</em></h1>
+    <p class="pz-lead">A gairebé 3.400 metres, a la cara nord del massís de la Maladeta, hi ha la glacera més gran dels Pirineus. Tres imatges del satèl·lit Sentinel-2, totes de final de setembre, quan la neu de l'hivern ja s'ha fos: <strong>el que queda és gel</strong>. Arrossega la línia per comparar-les.</p>
+
+    <div class="an-ctl">
+      <div><div class="ctl-lab">Esquerra</div><div class="seg" id="segA"><button data-v="2016">2016</button><button data-v="2022">2022</button><button data-v="2025">2025</button></div></div>
+      <div><div class="ctl-lab">Dreta</div><div class="seg" id="segB"><button data-v="2016">2016</button><button data-v="2022">2022</button><button data-v="2025">2025</button></div></div>
+      <div><div class="ctl-lab">Capa</div><div class="seg" id="segL"><button data-v="ndsi">Índex de neu</button><button data-v="natural">Color natural</button><button data-v="fals">Fals color</button></div></div>
+    </div>
+    <div class="an-stage" id="stage">
+      <img id="imgA" alt="" width="1086" height="759">
+      <img id="imgB" alt="" width="1086" height="759">
+      <div class="an-div"></div>
+      <div class="an-tag" id="tagA"></div><div class="an-tag" id="tagB"></div>
+      <input type="range" id="swipe" min="0" max="100" value="50" step="0.5" aria-label="Posició de la línia de comparació">
+    </div>
+    <p class="an-cap" id="cap"></p>
+
+    <div class="an-facts">
+      <div><b>135,7 ha</b><span>Superfície de la glacera el 1981</span></div>
+      <div><b>48,1 ha</b><span>Superfície el 2022: un 64,7 % menys</span></div>
+      <div><b>11,9 m</b><span>Gruix mitjà de gel el 2022; el 1981 eren gairebé 33 m</span></div>
+      <div><b>~30 ha</b><span>Superfície activa el 2025, segons el grup CryoPyr</span></div>
+    </div>
+
+    <h2>Què s'hi veu</h2>
+    <p class="txt"><strong>Índex de neu (NDSI).</strong> Combina la banda verda i l'infraroig d'ona curta per ressaltar neu i gel, que s'encenen en cian. L'aigua no s'hi confon: l'ibó de Cregüeña, ben ple, continua fosc.</p>
+    <p class="txt"><strong>Color natural.</strong> A final d'estiu el gel no és blanc sinó grisós. No és un defecte de la imatge: la pols sahariana i les algues n'enfosqueixen la superfície, i un gel més fosc reflecteix menys llum i es fon més de pressa.</p>
+    <p class="txt"><strong>Fals color.</strong> La vegetació surt en vermell i el gel en blanc blavós, cosa que ajuda a separar-lo de la roca clara.</p>
+    <p class="txt">L'estiu del 2022, excepcionalment càlid i sec, va ser el cop més dur: la glacera va perdre prop de tres metres i mig de gruix en un sol any. El 2025 el cos principal ja s'havia partit sota el pic del Mig.</p>
+
+    <p class="pz-note">Imatges: conté dades modificades de Copernicus Sentinel-2 (28-9-2016, 17-9-2022 i 3-9-2025), processades amb Copernicus Browser (Copernicus Data Space Ecosystem, ESA). Xifres: Vidaller et al. (2023), <em>The Cryosphere</em>, i seguiment del grup CryoPyr de l'Institut Pirinenc d'Ecologia (IPE-CSIC). Adaptació de la crònica «El último invierno del Aneto», de Marc Boixader Brault (2026).</p>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-main">
+    <span>Brault Maps</span>
+    <span>© 2026 · Cartografia · SIG · Didàctica</span>
+  </div>
+  <div class="footer-legal">
+    <a href="../legal/avis-legal.html">Avís legal</a>
+    <span class="fl-sep">·</span>
+    <a href="../legal/politica-privacitat.html">Política de privacitat</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Política de cookies</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Mapa web</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Accessibilitat</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id), st={a:'2016',b:'2025',l:'ndsi'};
+  const dates={'2016':'28 de setembre de 2016','2022':'17 de setembre de 2022','2025':'3 de setembre de 2025'};
+  const lname={ndsi:'índex de neu (NDSI)',natural:'color natural',fals:'fals color'};
+  function bind(seg,key){ $(seg).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{st[key]=b.dataset.v; render();})); }
+  function press(seg,v){ $(seg).querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v))); }
+  function render(){
+    $('imgA').src='aneto/'+st.a+'-'+st.l+'.jpg'; $('imgB').src='aneto/'+st.b+'-'+st.l+'.jpg';
+    $('imgA').alt="Glacera de l'Aneto, "+dates[st.a]+', '+lname[st.l]; $('imgB').alt="Glacera de l'Aneto, "+dates[st.b]+', '+lname[st.l];
+    $('tagA').textContent=st.a; $('tagB').textContent=st.b;
+    press('segA',st.a); press('segB',st.b); press('segL',st.l);
+    $('cap').textContent='Esquerra: '+dates[st.a]+'. Dreta: '+dates[st.b]+'. Capa: '+lname[st.l]+'.'+(st.a===st.b?' Has triat el mateix any als dos costats.':'');
+  }
+  $('swipe').addEventListener('input',e=>$('stage').style.setProperty('--x',e.target.value+'%'));
+  bind('segA','a'); bind('segB','b'); bind('segL','l'); render();
+})();
+</script>
+</body>
+</html>
