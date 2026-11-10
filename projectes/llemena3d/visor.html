@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Visor 3D de la Vall de Llémena — Brault Maps</title>
+<link rel="canonical" href="https://braultmaps.com/projectes/llemena3d/visor.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Brault Maps">
+<meta property="og:locale" content="ca_ES">
+<meta property="og:title" content="Visor 3D de la Vall de Llémena — Brault Maps">
+<meta property="og:description" content="Visor 3D del relleu de la Vall de Llémena i Rocacorba: ortofoto o topogràfic, exageració vertical, direcció de la llum i cota sota el cursor.">
+<meta property="og:url" content="https://braultmaps.com/projectes/llemena3d/visor.html">
+<meta property="og:image" content="https://braultmaps.com/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Visor 3D del relleu de la Vall de Llémena i Rocacorba: ortofoto o topogràfic, exageració vertical, direcció de la llum i cota sota el cursor.">
+<style>
+/* Layout: escena 3D a pantalla completa + tauler de control flotant (a baix en mòbil) */
+:root{
+  --bg:#111010; --bg2:#1a1918; --panel:rgba(26,25,24,.92); --fg:#f0ede6; --muted:#9a9690;
+  --line:rgba(240,237,230,.14); --accent:#c8b97a; --accent-fg:#111010; --plinth:#5d5446;
+  --f-ui:"Helvetica Neue", Helvetica, Arial, sans-serif; color-scheme:dark;
+}
+*{box-sizing:border-box} body{margin:0}
+html,body{height:100%}
+body{background:radial-gradient(120% 90% at 50% 30%, var(--bg) 0%, var(--bg2) 100%);color:var(--fg);font-family:var(--f-ui);font-size:15px;overflow:hidden}
+#scene{position:fixed;inset:0}
+canvas{display:block;outline:none}
+.panel{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:max(16px, env(safe-area-inset-left,0px));width:300px;max-width:calc(100% - 32px);
+  background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:4px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:14px;box-shadow:none}
+h1{font-family:var(--f-ui);font-weight:700;font-size:20px;letter-spacing:-.02em;line-height:1.15;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.lab{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:flex;justify-content:space-between}
+.lab b{color:var(--fg);font-weight:700;letter-spacing:0;font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:7px 6px;font-size:14px;color:var(--fg)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.seg button:focus-visible,.btns button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;align-items:center;gap:8px;font-size:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-size:13.5px}
+.btns button:hover{border-color:var(--accent)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13.5px;border-top:1px solid var(--line);padding-top:10px}
+.facts dt{color:var(--muted)} .facts dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.probe{position:fixed;right:max(16px, env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:7px 11px;font-size:13.5px;font-variant-numeric:tabular-nums;pointer-events:none}
+.credit{font-size:11.5px;color:var(--muted);line-height:1.35}
+.loading{position:fixed;inset:0;display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+.toggle{display:none}
+.loading[hidden]{display:none}
+@media (max-width:640px){
+  .panel{top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:max(12px, env(safe-area-inset-left,0px));right:max(12px, env(safe-area-inset-right,0px));width:auto;max-width:none;max-height:58vh;overflow:auto;gap:11px;padding:12px}
+  .panel.closed .more{display:none}
+  .toggle{display:inline-block}
+  .probe{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto}
+  h1{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.back{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px, env(safe-area-inset-right,0px));background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:8px 12px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);text-decoration:none}
+.back:hover{border-color:var(--accent)} .back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){.back{top:auto;bottom:auto;position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px, env(safe-area-inset-left,0px));right:auto} .probe{left:auto;right:max(12px, env(safe-area-inset-right,0px));font-size:12px;max-width:62%}}
+</style>
+</head>
+<body>
+<div id="scene" aria-label="Model 3D del relleu"></div>
+<a class="back" href="../llemena3d.html">&larr; El projecte</a>
+<div class="loading" id="loading">Carregant el relleu…</div>
+
+<aside class="panel" id="panel">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+    <div><h1>Vall de Llémena en relleu</h1><div class="sub" id="sub">Prototip de maqueta · Brault Maps</div></div>
+    <div class="btns"><button class="toggle" id="tgl" aria-expanded="true">Amaga</button></div>
+  </div>
+  <div class="grp">
+    <div class="lab">Zona</div>
+    <div class="seg" role="group" aria-label="Zona">
+      <button id="z-rocacorba" aria-pressed="true">Rocacorba</button>
+      <button id="z-vall" aria-pressed="false">Vall sencera</button>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="lab">Capa d'informació</div>
+    <div class="seg" role="group" aria-label="Capa">
+      <button id="s-orto" aria-pressed="true">Ortofoto</button>
+      <button id="s-topo" aria-pressed="false">Topogràfic</button>
+    </div>
+  </div>
+  <div class="more" style="display:flex;flex-direction:column;gap:14px">
+    <div class="grp">
+      <label class="lab" for="exag">Exageració vertical <b id="exag-v">2,0×</b></label>
+      <input id="exag" type="range" min="1" max="4" step="0.25" value="2">
+    </div>
+    <div class="grp">
+      <label class="lab" for="sun">Direcció de la llum <b id="sun-v">NO</b></label>
+      <input id="sun" type="range" min="0" max="359" step="1" value="315">
+    </div>
+    <div class="row"><input type="checkbox" id="plinth" checked><label for="plinth">Mostra el sòcol de la peça</label></div>
+    <div class="btns">
+      <button id="v-obl">Vista obliqua</button><button id="v-top">Vista zenital</button><button id="v-low">Vista rasant</button>
+    </div>
+    <dl class="facts" id="facts"></dl>
+    <div class="credit">Ortofoto, MDT LiDAR i toponímia: ICGC (CC BY 4.0). Vies i rius: © OpenStreetMap (ODbL). Arrossega per girar, roda o pinça per apropar.</div>
+  </div>
+</aside>
+<div class="probe" id="probe">Passa per sobre del relleu</div>
+
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script>
+const META = {
+  rocacorba:{nx:625,ny:625,zmin:295.5,zmax:990.2,bbox:[471500,4655400,476500,4660400],esc:25000,base:3,label:"Rocacorba · 5 × 5 km"},
+  vall:{nx:1000,ny:840,zmin:54.8,zmax:1124.0,bbox:[460500,4644500,485500,4665500],esc:50000,base:4,label:"Vall de Llémena · 25 × 21 km"}
+};
+const state={zona:"rocacorba",estil:"orto",exag:2,sun:315,plinth:true};
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+$("scene").appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,1,0.01,500);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.08; controls.maxPolarAngle=Math.PI*0.495;
+scene.add(new THREE.HemisphereLight(0xf4f1ea,0x4a4436,0.55));
+const sun=new THREE.DirectionalLight(0xfff4e2,1.0); scene.add(sun); scene.add(sun.target);
+
+const cache={}; const texLoader=new THREE.TextureLoader();
+let terrain=null, plinth=null, cur=null;
+
+function loadHeights(zona){
+  if(cache["h"+zona]) return Promise.resolve(cache["h"+zona]);
+  return new Promise((res,rej)=>{const im=new Image(); im.onload=()=>{
+    const m=META[zona], c=document.createElement("canvas"); c.width=m.nx; c.height=m.ny;
+    const g=c.getContext("2d"); g.drawImage(im,0,0); const d=g.getImageData(0,0,m.nx,m.ny).data;
+    const h=new Float32Array(m.nx*m.ny); for(let i=0;i<h.length;i++) h[i]=(d[i*4]*256+d[i*4+1])/20+m.zmin;
+    cache["h"+zona]=h; res(h);}; im.onerror=rej; im.src=`h_${zona}.png`;});
+}
+function loadTex(zona,estil){
+  const k=`t${zona}${estil}`; if(cache[k]) return Promise.resolve(cache[k]);
+  return new Promise((res,rej)=>texLoader.load(`t_${zona}_${estil}.jpg`,t=>{t.encoding=THREE.sRGBEncoding;
+    t.anisotropy=renderer.capabilities.getMaxAnisotropy(); cache[k]=t; res(t);},undefined,rej));
+}
+function dims(m){return {w:(m.bbox[2]-m.bbox[0])/1000, d:(m.bbox[3]-m.bbox[1])/1000};}
+
+function buildTerrain(zona,h){
+  const m=META[zona],{w,d}=dims(m),nx=m.nx,ny=m.ny;
+  const pos=new Float32Array(nx*ny*3), uv=new Float32Array(nx*ny*2);
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;
+    pos[k*3]=i/(nx-1)*w-w/2; pos[k*3+2]=j/(ny-1)*d-d/2; pos[k*3+1]=0;
+    uv[k*2]=i/(nx-1); uv[k*2+1]=1-j/(ny-1);}
+  const idx=new Uint32Array((nx-1)*(ny-1)*6); let p=0;
+  for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){const a=j*nx+i,b=a+1,c=a+nx,e=c+1; idx.set([a,c,b,b,c,e],p); p+=6;}
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  g.setAttribute("uv",new THREE.BufferAttribute(uv,2)); g.setIndex(new THREE.BufferAttribute(idx,1));
+  return g;
+}
+function applyHeights(){
+  const m=META[cur.zona],h=cur.h,pos=terrain.geometry.attributes.position.array;
+  for(let k=0;k<h.length;k++) pos[k*3+1]=(h[k]-m.zmin)/1000*state.exag;
+  terrain.geometry.attributes.position.needsUpdate=true; terrain.geometry.computeVertexNormals();
+  terrain.geometry.computeBoundingSphere(); buildPlinth();
+}
+function buildPlinth(){
+  if(plinth){scene.remove(plinth); plinth.geometry.dispose();}
+  const m=META[cur.zona],nx=m.nx,ny=m.ny,pos=terrain.geometry.attributes.position.array;
+  const base=-(m.base/1000*m.esc/1000);  // gruix de base físic (mm) -> km de terreny
+  const loop=[]; for(let i=0;i<nx;i++)loop.push(i); for(let j=1;j<ny;j++)loop.push(j*nx+nx-1);
+  for(let i=nx-2;i>=0;i--)loop.push((ny-1)*nx+i); for(let j=ny-2;j>0;j--)loop.push(j*nx);
+  const v=[]; for(let s=0;s<loop.length;s++){const a=loop[s],b=loop[(s+1)%loop.length];
+    const ax=pos[a*3],ay=pos[a*3+1],az=pos[a*3+2],bx=pos[b*3],by=pos[b*3+1],bz=pos[b*3+2];
+    v.push(ax,ay,az, ax,base,az, bx,by,bz,  bx,by,bz, ax,base,az, bx,base,bz);}
+  const {w,d}=dims(m); v.push(-w/2,base,-d/2, w/2,base,-d/2, w/2,base,d/2, -w/2,base,-d/2, w/2,base,d/2, -w/2,base,d/2);
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(v,3)); g.computeVertexNormals();
+  plinth=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:new THREE.Color(css("--plinth")||"#8a7d68"),roughness:1,side:THREE.DoubleSide}));
+  plinth.visible=state.plinth; scene.add(plinth);
+}
+function setSun(){
+  const m=META[cur.zona],{w}=dims(m),a=(state.sun)*Math.PI/180,r=w*1.5;
+  // azimut geogràfic: 0 = nord (−z), 90 = est (+x)
+  sun.position.set(Math.sin(a)*r, r*0.8, -Math.cos(a)*r); sun.target.position.set(0,0,0);
+  const dirs=["N","NE","E","SE","S","SO","O","NO"]; $("sun-v").textContent=dirs[Math.round(state.sun/45)%8];
+}
+function view(kind){
+  const m=META[cur.zona],{w,d}=dims(m),s=Math.max(w,d);
+  const hgt=(m.zmax-m.zmin)/1000*state.exag;
+  if(kind==="top") camera.position.set(0.0001,s*1.55,0.0001);
+  else if(kind==="low") camera.position.set(-s*0.15,hgt*1.2+s*0.08,s*0.95);
+  else camera.position.set(-s*0.55,s*0.62,s*0.85);
+  controls.target.set(0,hgt*0.25,0); controls.update();
+}
+function facts(){
+  const m=META[cur.zona],{w,d}=dims(m),esc=m.esc;
+  const pw=w*1e6/esc/10, pd=d*1e6/esc/10, ph=(m.zmax-m.zmin)*1000/esc*state.exag/10+m.base/10;
+  const f=n=>n.toLocaleString("ca-ES",{maximumFractionDigits:1});
+  $("facts").innerHTML=`<dt>Àmbit</dt><dd>${m.label}</dd><dt>Escala de la peça</dt><dd>1:${esc.toLocaleString("ca-ES")}</dd>
+  <dt>Mida física</dt><dd>${f(pw)} × ${f(pd)} cm</dd><dt>Alçada màx. (amb base)</dt><dd>${f(ph)} cm</dd>
+  <dt>Cotes</dt><dd>${Math.round(m.zmin)}–${Math.round(m.zmax)} m</dd>`;
+  $("exag-v").textContent=state.exag.toLocaleString("ca-ES",{minimumFractionDigits:1,maximumFractionDigits:2})+"×";
+}
+async function show(){
+  $("loading").hidden=false;
+  try{
+    const [h,t]=await Promise.all([loadHeights(state.zona),loadTex(state.zona,state.estil)]);
+    if(!cur||cur.zona!==state.zona){
+      if(terrain){scene.remove(terrain); terrain.geometry.dispose();}
+      cur={zona:state.zona,h}; terrain=new THREE.Mesh(buildTerrain(state.zona,h),new THREE.MeshStandardMaterial({map:t,roughness:0.92,metalness:0}));
+      scene.add(terrain); applyHeights(); setSun(); view("obl");
+    } else { terrain.material.map=t; terrain.material.needsUpdate=true; }
+    facts(); $("loading").hidden=true;
+    loadTex(state.zona,state.estil==="orto"?"topo":"orto").catch(()=>{});
+  }catch(e){ $("loading").textContent="No s'han pogut carregar les dades del relleu. Torna a carregar la pàgina."; }
+}
+function press(prefix,val){document.querySelectorAll(`[id^="${prefix}-"]`).forEach(b=>b.setAttribute("aria-pressed",String(b.id===`${prefix}-${val}`)));}
+["rocacorba","vall"].forEach(z=>$("z-"+z).onclick=()=>{state.zona=z;press("z",z);show();});
+["orto","topo"].forEach(s=>$("s-"+s).onclick=()=>{state.estil=s;press("s",s);show();});
+$("exag").oninput=e=>{state.exag=+e.target.value; if(cur){applyHeights(); facts();}};
+$("sun").oninput=e=>{state.sun=+e.target.value; if(cur)setSun();};
+$("plinth").onchange=e=>{state.plinth=e.target.checked; if(plinth)plinth.visible=state.plinth;};
+$("v-obl").onclick=()=>view("obl"); $("v-top").onclick=()=>view("top"); $("v-low").onclick=()=>view("low");
+$("tgl").onclick=()=>{const p=$("panel"),c=p.classList.toggle("closed"); $("tgl").textContent=c?"Controls":"Amaga"; $("tgl").setAttribute("aria-expanded",String(!c));};
+
+if(matchMedia("(max-width:640px)").matches) $("tgl").click();  // en mòbil, comença amb el tauler plegat
+
+// sonda: coordenades i cota sota el cursor
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+renderer.domElement.addEventListener("pointermove",e=>{
+  if(!terrain)return; const r=renderer.domElement.getBoundingClientRect();
+  ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(ndc,camera);
+  const hit=ray.intersectObject(terrain)[0]; if(!hit){$("probe").textContent="Passa per sobre del relleu";return;}
+  const m=META[cur.zona],{w,d}=dims(m),u=(hit.point.x+w/2)/w,v=(hit.point.z+d/2)/d;
+  const X=m.bbox[0]+u*(m.bbox[2]-m.bbox[0]), Y=m.bbox[3]-v*(m.bbox[3]-m.bbox[1]);
+  const i=Math.min(m.nx-1,Math.max(0,Math.round(u*(m.nx-1)))), j=Math.min(m.ny-1,Math.max(0,Math.round(v*(m.ny-1))));
+  $("probe").textContent=`X ${Math.round(X).toLocaleString("ca-ES")} · Y ${Math.round(Y).toLocaleString("ca-ES")} · ${Math.round(cur.h[j*m.nx+i])} m`;
+});
+function resize(){const w=innerWidth,h=innerHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();}
+addEventListener("resize",resize); resize();
+(function loop(){requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera);})();
+show();
+</script>
+</body>
+</html>

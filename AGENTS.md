@@ -46,6 +46,7 @@ La web ha de semblar feta per un dissenyador gràfic i web, no generada per una 
 - `repositori/vic3d/data/*/scene.js` pesen 16 MB cadascun (exportació de Qgis2threejs 2.10.2): no els obris ni els carreguis al context.
 - `mapes/pirineu3d.html` pesa uns 2 MB (relleu incrustat): no el carreguis sencer al context si no cal.
 - El contingut privat (gorgs) no va en aquest repo: és públic. Va en un repo privat a part.
+- `projectes/llemena3d/` conté el visor 3D de la Vall de Llémena (`visor.html`, alçades `h_*.png`, textures `t_*.jpg`, three.js r128 a `lib/`). Les dades originals són al disc del Marc (`Projecte VDL`).
 - `404.html` fa servir rutes absolutes (`/css/style.css`) perquè es pot servir des de qualsevol profunditat.
 
 ## Tasques repetitives
