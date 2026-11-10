@@ -343,3 +343,11 @@ footer { margin-top: auto; }
 .proj-card.feature .proj-thumb { min-height: 140px; }
 @media (max-width: 720px) { .proj-card.feature { grid-column: auto; } }
 .proj-status.live { background: rgba(127,175,138,0.18); color: #7faf8a; }
+
+/* ── ACCESSIBILITAT ── */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Joc de les comarques — Brault Maps</title>
+<link rel="canonical" href="https://braultmaps.com/recursos/comarques.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Brault Maps">
+<meta property="og:locale" content="ca_ES">
+<meta property="og:title" content="Joc de les comarques — Brault Maps">
+<meta property="og:description" content="Joc interactiu per aprendre les 43 comarques de Catalunya: troba-les al mapa contra rellotge.">
+<meta property="og:url" content="https://braultmaps.com/recursos/comarques.html">
+<meta property="og:image" content="https://braultmaps.com/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Joc interactiu per aprendre les 43 comarques de Catalunya: troba-les al mapa contra rellotge.">
 <link rel="stylesheet" href="../css/style.css">
 <style>
@@ -51,7 +61,9 @@
   .game-top h2 { font-size: 1.4rem; }
   .hud-value { font-size: 1rem; }
   .hud-cell.ask .hud-value { font-size: 0.85rem; }
-  .hud-cell { padding: 0.6rem 0.5rem; }
+  .hud { flex-wrap: wrap; }
+  .hud-cell { padding: 0.6rem 0.5rem; flex: 1 1 30%; min-width: 0; }
+  .hud-btn { padding: 0.6rem 0.4rem; }
 }
 </style>
 </head>
