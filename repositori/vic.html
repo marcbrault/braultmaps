@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vic, cinc segles creixent — Brault Maps</title>
+<link rel="canonical" href="https://braultmaps.com/repositori/vic.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Brault Maps">
+<meta property="og:locale" content="ca_ES">
+<meta property="og:title" content="Vic, cinc segles creixent — Brault Maps">
+<meta property="og:description" content="El creixement de Vic edifici a edifici, del 1538 al 2018, i dos models 3D de la ciutat segons l'any de construcció i els usos.">
+<meta property="og:url" content="https://braultmaps.com/repositori/vic.html">
+<meta property="og:image" content="https://braultmaps.com/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="El creixement de Vic edifici a edifici, del 1538 al 2018, i dos models 3D de la ciutat segons l'any de construcció i els usos.">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.pz { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2.5rem 5rem; }
+.pz-kicker { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 1.5rem 0 1rem; }
+.pz h1 { font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 700; letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 1.5rem; }
+.pz h1 em { font-weight: 300; color: var(--ink2); }
+.pz-lead { font-size: 0.95rem; line-height: 1.75; color: var(--ink2); max-width: 620px; margin-bottom: 2.5rem; }
+.pz-lead strong { color: var(--ink); font-weight: 700; }
+.seg { display: inline-flex; border: 1px solid var(--border); }
+.seg button { background: none; border: 0; border-left: 1px solid var(--border); color: var(--ink2); font: 700 0.62rem var(--ff); letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.9rem; cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.ctl-lab { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.5rem; }
+.pz-note { margin-top: 2.5rem; font-size: 0.72rem; line-height: 1.7; color: var(--ink2); max-width: 760px; }
+.pz-note a { color: var(--accent); text-decoration: none; }
+.pz h2 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; margin: 3.5rem 0 1rem; }
+.pz p.txt { font-size: 0.9rem; line-height: 1.75; color: var(--ink2); max-width: 640px; margin-bottom: 1rem; }
+.pz p.txt strong { color: var(--ink); }
+@media (max-width: 768px) { .pz { padding: 1.5rem 1.25rem 3rem; } }
+
+.vc-stage { position: relative; border: 1px solid var(--border); background: var(--bg2); aspect-ratio: 1600 / 851; overflow: hidden; }
+.vc-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.vc-year { position: absolute; left: 1.5rem; top: 1.1rem; font-size: clamp(2.5rem, 9vw, 6rem); font-weight: 700; letter-spacing: -0.05em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; pointer-events: none; }
+.vc-bar { display: flex; align-items: center; gap: 1.25rem; border: 1px solid var(--border); border-top: 0; padding: 0.9rem 1.25rem; }
+.vc-play { background: var(--ink); color: var(--bg); border: 0; font: 700 0.62rem var(--ff); letter-spacing: 0.12em; text-transform: uppercase; padding: 0.7rem 1rem; cursor: pointer; min-width: 6.5rem; }
+.vc-bar input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
+.vc-ends { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: var(--ink2); font-variant-numeric: tabular-nums; }
+.vc-leg { display: flex; align-items: center; gap: 0.8rem; margin-top: 1rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }
+.vc-leg i { display: block; width: 180px; height: 6px; background: linear-gradient(90deg, #d7191c, #fdae61, #ffffbf, #abdda4, #2b83ba); }
+.vc-3d { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.vc-3d a { background: var(--bg); padding: 1.6rem 1.75rem; text-decoration: none; display: block; transition: background 0.12s; }
+.vc-3d a:hover { background: var(--bg2); }
+.vc-3d .c { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+.vc-3d .t { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: 0.4rem; }
+.vc-3d .d { font-size: 0.8rem; line-height: 1.6; color: var(--ink2); }
+.vc-3d .w { margin-top: 0.9rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }
+@media (max-width: 768px) { .vc-3d { grid-template-columns: 1fr; } .vc-leg i { width: 110px; } .vc-ends { display: none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="../index.html">
+    <span class="logo-mark"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#f0ede6" stroke-width="1"/><line x1="5" y1="1.5" x2="5" y2="8.5" stroke="#f0ede6" stroke-width=".8"/><line x1="1.5" y1="5" x2="8.5" y2="5" stroke="#f0ede6" stroke-width=".8"/></svg></span>
+    Brault Maps
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Inici</a></li>
+    <li><a href="../mapes.html">Mapes</a></li>
+    <li><a href="../recursos.html">Recursos</a></li>
+    <li><a href="../projectes.html">Projectes</a></li>
+    <li><a href="../repositori.html" class="active">Repositori</a></li>
+    <li><a href="../sobre.html">Qui sóc</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="pz">
+    <a href="../repositori.html" class="back-btn">← Tornar al repositori</a>
+    <div class="pz-kicker">Urbanisme · Osona</div>
+    <h1>Vic, cinc segles<br><em>creixent</em></h1>
+    <p class="pz-lead">Cada edifici de Vic apareix l'any que el cadastre li atribueix. Mou el control o prem el botó i mira com la ciutat passa d'un nucli antic compacte a <strong>les grans illes del nord</strong>, les més recents.</p>
+
+    <div class="vc-stage" id="stage">
+      <img id="frame" src="vic3d/creixement/1538.webp" alt="Edificis de Vic construïts fins a l'any 1538" width="1600" height="851">
+      <div class="vc-year" id="year" aria-hidden="true">1538</div>
+    </div>
+    <div class="vc-bar">
+      <button class="vc-play" id="play">Reprodueix</button>
+      <span class="vc-ends">1538</span>
+      <input type="range" id="t" min="0" max="48" step="1" value="0" aria-label="Any">
+      <span class="vc-ends">2018</span>
+    </div>
+    <div class="vc-leg"><span>Més antic</span><i></i><span>Més recent</span></div>
+
+    <h2>La mateixa ciutat, en tres dimensions</h2>
+    <p class="txt">Dos models navegables de tot el parc edificat. Pesen uns 16 MB cadascun: amb una connexió lenta triguen una mica a obrir-se.</p>
+    <div class="vc-3d">
+      <a href="vic3d/vic_3d_anys.html"><div class="c">Model 3D</div><div class="t">Per any de construcció</div><div class="d">Els mateixos colors que l'animació, amb l'alçada real dels edificis. Orbita, amplia i explora.</div><div class="w">Obre el visor →</div></a>
+      <a href="vic3d/vic_3d_usos.html"><div class="c">Model 3D</div><div class="t">Per usos</div><div class="d">Residencial, industrial, agrícola, serveis: on es viu, on es treballa i on es barreja tot.</div><div class="w">Obre el visor →</div></a>
+    </div>
+
+    <p class="pz-note">Dades: edificis del cadastre (Dirección General del Catastro, servei INSPIRE), municipi de Vic. L'any de construcció és el que consta al cadastre: en els edificis més antics és aproximat i sovint correspon a l'última gran reforma. Un fotograma cada deu anys. Elaboració pròpia amb QGIS i Qgis2threejs.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-main">
+    <span>Brault Maps</span>
+    <span>© 2026 · Cartografia · SIG · Didàctica</span>
+  </div>
+  <div class="footer-legal">
+    <a href="../legal/avis-legal.html">Avís legal</a>
+    <span class="fl-sep">·</span>
+    <a href="../legal/politica-privacitat.html">Política de privacitat</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Política de cookies</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Mapa web</a>
+    <span class="fl-sep">·</span>
+    <a class="fl-disabled" title="Pròximament">Accessibilitat</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const N=49, y0=1538, $=id=>document.getElementById(id);
+  const img=$('frame'), t=$('t'), play=$('play');
+  const src=i=>'vic3d/creixement/'+(y0+i*10)+'.webp';
+  let timer=null;
+  function show(i){ const y=y0+i*10; img.src=src(i); img.alt="Edificis de Vic construïts fins a l'any "+y; $('year').textContent=y; }
+  function stop(){ clearInterval(timer); timer=null; play.textContent=(+t.value>=N-1)?'Torna a començar':'Reprodueix'; }
+  t.addEventListener('input',()=>{ if(timer) stop(); show(+t.value); });
+  play.addEventListener('click',()=>{
+    if(timer) return stop();
+    if(+t.value>=N-1) t.value=0;
+    play.textContent='Atura';
+    timer=setInterval(()=>{ t.value=+t.value+1; show(+t.value); if(+t.value>=N-1) stop(); }, 260);
+  });
+  for(let i=1;i<N;i++){ const p=new Image(); p.src=src(i); }   // precarrega (1,9 MB en total)
+  show(0);
+})();
+</script>
+</body>
+</html>

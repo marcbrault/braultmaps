@@ -10,6 +10,7 @@ from collections import defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 SKIP_DIRS = {'.git', 'scripts', '.agents'}
+DUP_OK = ('repositori/vic3d/creixement/',)  # dècades sense edificis nous: fotogrames idèntics
 NO_SITEMAP = {'404.html', 'mapes/BraultMaps_Index_de_Gini.html'}  # error i iframe
 
 files = []
@@ -29,6 +30,8 @@ for f in pages:
         if p in ('', '.'):
             p = 'index.html'
         if os.path.isdir(p):
+            if m.endswith('/') and not os.path.exists(os.path.join(p, 'index.html')):
+                continue  # prefix de ruta dins de JavaScript ('carpeta/' + nom)
             p = os.path.join(p, 'index.html')
         if not os.path.exists(p):
             print(f'ENLLAÇ TRENCAT  {f} -> {m}'); problems += 1
@@ -48,6 +51,8 @@ for l in locs:
 # 3. Duplicats exactes
 h = defaultdict(list)
 for f in files:
+    if f.startswith(DUP_OK):
+        continue
     h[hashlib.md5(open(f, 'rb').read()).hexdigest()].append(f)
 for v in h.values():
     if len(v) > 1:
