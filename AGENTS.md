@@ -44,11 +44,12 @@ La web ha de semblar feta per un dissenyador gràfic i web, no generada per una 
 
 ## Coses conegudes
 - `repositori/vic3d/data/*/scene.js` pesen 16 MB cadascun (exportació de Qgis2threejs 2.10.2): no els obris ni els carreguis al context.
-- `mapes/pirineu3d.html` pesa uns 2 MB (relleu incrustat): no el carreguis sencer al context si no cal.
+- `mapes/pirineu3d.html` pesa uns 2 MB (relleu incrustat): no el carreguis sencer al context si no cal. Les tessel·les franceses de `Brault Maps\fr\rge_utm` estan etiquetades com a UTM 31N però les coordenades són Lambert-93 (EPSG:2154): cal llegir-les amb aquest CRS.
 - El contingut privat (gorgs) no va en aquest repo: és públic. Va en un repo privat a part.
 - `projectes/llemena3d/` conté el visor 3D de la Vall de Llémena (`visor.html`, alçades `h_*.png`, textures `t_*.jpg`, three.js r128 a `lib/`). Les dades originals són al disc del Marc (`Projecte VDL`).
-- La portada (`index.html`) porta un SVG de corbes de nivell entre `<!-- CORBES:INICI -->` i `<!-- CORBES:FI -->`: no l'editis a mà, es regenera amb `python3 scripts/portada_corbes.py`. El relleu de `mapes/pirineu3d.html` té un forat al nord-est i una franja dolenta al sud.
+- La portada (`index.html`) porta un SVG de corbes de nivell entre `<!-- CORBES:INICI -->` i `<!-- CORBES:FI -->`: no l'editis a mà, es regenera amb `python3 scripts/portada_corbes.py`. El relleu de `mapes/pirineu3d.html` (627 × 481 cel·les) ja inclou el vessant francès.
 - `repositori/vic.html` agrupa l'animació del creixement de Vic (`vic3d/creixement/*.webp`) i els dos visors 3D. `mapes/aneto.html` fa servir les imatges de `mapes/aneto/`.
+- Les miniatures de les targetes són captures reals (`img/mini/*.webp`) fetes amb `python3 scripts/miniatures.py`. Quan afegeixis una eina, afegeix-la a `MINIS` i torna'l a executar.
 - `404.html` fa servir rutes absolutes (`/css/style.css`) perquè es pot servir des de qualsevol profunditat.
 
 ## Tasques repetitives
