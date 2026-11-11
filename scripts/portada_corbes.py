@@ -13,7 +13,7 @@ from contourpy import contour_generator
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VW, VH = 1600, 900          # viewBox de la portada
 EQUI, MESTRA = 100, 500     # equidistància i corbes mestres (m)
-ROW0 = 0.255                # on comença el retall: evita el forat del NE i la franja del sud del relleu
+ROW0 = 0.26                 # on comença el retall (fracció nord-sud del relleu)
 MAX_CIMS, DIST_CIMS = 6, 130  # cims etiquetats i separació mínima entre ells (px)
 
 src = open(os.path.join(ROOT, 'mapes/pirineu3d.html'), encoding='utf8').read()
